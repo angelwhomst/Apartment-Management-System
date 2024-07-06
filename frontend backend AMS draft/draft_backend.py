@@ -150,7 +150,7 @@ def create_tables(conn):
 # ============================================================
 
 
-# needed function for the tables that need admin_id
+# function for tables that need admin_id
 def get_admin_id(conn):
     cursor = conn.cursor()
     cursor.execute("SELECT admin_id FROM Admin LIMIT 1")
