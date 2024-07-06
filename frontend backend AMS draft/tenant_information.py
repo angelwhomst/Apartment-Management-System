@@ -7,11 +7,14 @@ from tkcalendar import Calendar
 from base import BaseFrame
 from login import LoginFrame
 from profile import ProfileFrame
+import draft_backend
 
 class TenantInformationFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        self.tree = None  # Initialize tree as None
         self.create_widgets()
+        self.populate_treeview()  # Call populate_treeview after creating the widgets
 
     def create_widgets(self):
         # Add background image
@@ -61,12 +64,12 @@ class TenantInformationFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Building Name", "Unit Number", "Name", "Contact Number", "Status", "Start Date")
-        tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=columns, show='headings')  # Set self.tree
 
         # Define headings with adjusted styles
         for col in columns:
-            tree.heading(col, text=col, anchor='w')
-            tree.column(col, anchor='w', width=190)  # Align data to the left
+            self.tree.heading(col, text=col, anchor='w')
+            self.tree.column(col, anchor='w', width=190)  # Align data to the left
 
         # Style Treeview
         style = ttk.Style(self)
@@ -78,29 +81,23 @@ class TenantInformationFrame(BaseFrame):
                         font=('Century Gothic', 14, 'bold'))
 
         # Create Scrollbar
-        vsb = Scrollbar(self, orient=tk.VERTICAL, command=tree.yview)
+        vsb = Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
         vsb.place(x=1835, y=370, height=537)
 
         # Configure Treeview to use Scrollbar
-        tree.configure(yscrollcommand=vsb.set)
+        self.tree.configure(yscrollcommand=vsb.set)
 
         # Place Treeview inside the container
-        tree.place(x=440, y=370, width=1415, height=538)
+        self.tree.place(x=440, y=370, width=1415, height=538)
 
-        # Example data (adjust as needed)
-        data = [
-            ("Building A", "101", "John Doe", "1234567890", "Paid", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "Not Paid", "2023-02-15"),
-            # Add more data if needed
-        ]
-
-        # Insert example data multiple times for more rows
-        for _ in range(5):
-            data.extend(data)
-
-        # Insert example data into Treeview
-        for item in data:
-            tree.insert('', 'end', values=item)
+    def populate_treeview(self):
+        conn = draft_backend.get_db_connection()
+        if conn:
+            tenant_data = draft_backend.fetch_tenant_treeview(conn)
+            conn.close()
+            # Insert data into Treeview
+            for row in tenant_data:
+                self.tree.insert("", "end", values=row)
 
     def add_profile_button(self):
         profile_btn = ctk.CTkButton(master=self, text="Profile", corner_radius=0, fg_color="#CFB9A3",

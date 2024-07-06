@@ -78,7 +78,7 @@ def create_tables(conn):
     firstName                      VARCHAR (50)  NOT NULL,
     middleName                     VARCHAR (50),
     suffix                         VARCHAR (50),
-    email                          VARCHAR (50)  NOT NULL,
+    email                          VARCHAR (50),
     contact_number                 CHAR (12),
     move_in_date                   DATE,
     lease_start_date               DATE,
@@ -164,7 +164,7 @@ def get_admin_id(conn):
         return None
 
 
-# ================ LOGIN PAGE FUNCTIONS =======================
+# ================ login PAGE FUNCTIONS =======================
 def hash_password(password):  # hashes the password using SHA-256
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -212,7 +212,7 @@ def check_apartment_units_exist(conn):
     return count > 0
 
 
-# ================ Add Building PAGE FUNCTIONS =======================
+# ================ add_building PAGE FUNCTIONS =======================
 
 def check_building_exists(conn, building_name):
     cursor = conn.cursor()
@@ -282,7 +282,7 @@ def edit_last_inserted_building_id(conn, building_name, country, province, city,
         print(str(e))
 
 
-# ================ Add Unit PAGE FUNCTIONS =======================
+# ================ add_unit PAGE FUNCTIONS =======================
 def fetch_building_names(conn):  # function to populate combobox
     cursor = conn.cursor()
     cursor.execute('SELECT building_name FROM Apartment_Building')
@@ -327,7 +327,7 @@ def insert_unit(conn, building_id, unit_number, rental_rate, number_of_bedrooms,
         conn.rollback()
 
 
-# ================ Display Unit PAGE FUNCTIONS =======================
+# ================ display_unit_info PAGE FUNCTIONS =======================
 
 def fetch_building_id_from_latest_unit(conn):
     cursor = conn.cursor()
@@ -370,7 +370,8 @@ def fetch_new_unit_info(conn, unit_id):
     unit_info = cursor.fetchone()  # fetch one row
     return unit_info
 
-# ================ Add Expense PAGE FUNCTIONS =======================
+
+# ================ add_expense PAGE FUNCTIONS =======================
 def insert_expense(conn, expense_date, expense_amount, expense_type, description):
     admin_id = get_admin_id(conn)
     if not admin_id:
@@ -387,7 +388,7 @@ def insert_expense(conn, expense_date, expense_amount, expense_type, description
         conn.rollback()
 
 
-# ================ Display Expense PAGE FUNCTIONS =======================
+# ================ display_expense PAGE FUNCTIONS =======================
 
 def fetch_latest_expense_id(conn):
     cursor = conn.cursor()
@@ -398,8 +399,9 @@ def fetch_latest_expense_id(conn):
 # ================ tenant_information PAGE FUNCTIONS =======================
 
 def fetch_tenant_treeview(conn):
-    cursor = conn.cursor()
-    cursor.execute(''' SELECT
+    try:
+        cursor = conn.cursor()
+        cursor.execute(''' SELECT
         AB.building_name,
         AU.unit_number,
         T.firstName || ' ' || T.lastName AS tenant_name,
@@ -419,5 +421,49 @@ def fetch_tenant_treeview(conn):
         AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date -- checks if the tenant paid between the start and end of lease
     ORDER BY P.payment_date DESC;
 ''')
-    return cursor.fetchall()
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
 
+
+# ================ add_tenant PAGE FUNCTIONS =======================
+
+def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
+                  lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
+                  emergency_contact_relationship, tenant_dob, sex, nationality, income):
+    admin_id = get_admin_id(conn)
+    if not admin_id:
+        return
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO Tenant (
+    admin_id, 
+    lastName, 
+    firstName, 
+    middleName, 
+    suffix, 
+    email, 
+    contact_number, 
+    move_in_date, 
+    lease_start_date,
+    lease_end_date, 
+    Emergency_contact_name, 
+    Emergency_contact_number, 
+    Emergency_contact_relationship, 
+    tenant_dob, 
+    sex, 
+    nationality, 
+    income
+) VALUES (
+    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+);
+''', (admin_id, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
+      lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
+      emergency_contact_relationship, tenant_dob, sex, nationality, income))
+        conn.commit()
+    except Exception as e:
+        print(f"Error saving tenant information: {str(e)}")
+        conn.rollback()
