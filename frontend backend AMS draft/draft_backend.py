@@ -371,8 +371,6 @@ def fetch_new_unit_info(conn, unit_id):
     return unit_info
 
 # ================ Add Expense PAGE FUNCTIONS =======================
-
-
 def insert_expense(conn, expense_date, expense_amount, expense_type, description):
     admin_id = get_admin_id(conn)
     if not admin_id:
@@ -395,3 +393,31 @@ def fetch_latest_expense_id(conn):
     cursor = conn.cursor()
     cursor.execute('SELECT max(expense_id) FROM Expenses;')
     return cursor.fetchone()[0]
+
+
+# ================ tenant_information PAGE FUNCTIONS =======================
+
+def fetch_tenant_treeview(conn):
+    cursor = conn.cursor()
+    cursor.execute(''' SELECT
+        AB.building_name,
+        AU.unit_number,
+        T.firstName || ' ' || T.lastName AS tenant_name,
+        T.contact_number AS contact_number,
+        CASE
+            WHEN P.payment_id IS NOT NULL THEN 'Paid'
+            ELSE 'Not Paid'
+        END AS payment_status,
+        T.lease_start_date
+    FROM Tenant AS T
+    INNER JOIN Apartment_Unit AS AU
+        ON T.tenant_id = AU.unit_id
+    INNER JOIN Apartment_Building AS AB
+        ON AU.building_id = AB.building_id
+    LEFT JOIN Payment AS P
+        ON T.tenant_id = P.tenant_id
+        AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date -- checks if the tenant paid between the start and end of lease
+    ORDER BY P.payment_date DESC;
+''')
+    return cursor.fetchall()
+

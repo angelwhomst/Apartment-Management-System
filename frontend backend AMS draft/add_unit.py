@@ -108,6 +108,11 @@ class AddUnitComponent:
         # Fetch the selected building name from the combo box
         building_name = self.combo_box_building_name.get()
 
+        # Validate required fields
+        if not unit_number:
+            CTkMessagebox(title="Error", message="Unit number is required.")
+            return
+
         # Proceed to save the data to the database
         conn = draft_backend.get_db_connection()
         if not conn:
