@@ -9,15 +9,7 @@ from payment_management import PaymentManagementFrame
 from report import ReportFrame
 from building_information import BuildingInformationFrame
 from profile import ProfileFrame
-import draft_backend
-
-
-def initialize_database():
-    conn = draft_backend.get_db_connection()
-    with conn:
-        draft_backend.create_tables(conn)
-        draft_backend.insert_admin(conn, 'admin', 'admin')
-    conn.close()
+from expenses import ExpenseFrame
 
 
 class ApartmentManagementApp(CTk):
@@ -32,13 +24,11 @@ class ApartmentManagementApp(CTk):
 
         self.frames = {}
         self.create_frames()
-        self.show_frame(DashboardFrame)
+        self.show_frame(WelcomeFrame)
 
     def create_frames(self):
-        for F in (
-                LoginFrame, WelcomeFrame, DashboardFrame, UnitsInfoFrame, TenantInformationFrame,
-                PaymentManagementFrame,
-                ReportFrame, BuildingInformationFrame, ProfileFrame):
+        for F in (LoginFrame, WelcomeFrame, DashboardFrame, UnitsInfoFrame, TenantInformationFrame, PaymentManagementFrame,
+                  ReportFrame, BuildingInformationFrame, ProfileFrame, ExpenseFrame):
             frame = F(self.container, self)
             self.frames[F] = frame
             frame.place(relx=0, rely=0, relwidth=1, relheight=1)
@@ -47,11 +37,6 @@ class ApartmentManagementApp(CTk):
         frame = self.frames[cont]
         frame.tkraise()
 
-
 if __name__ == "__main__":
-    # initialize the database before starting the app
-    initialize_database()
-
-    # start the application
     app = ApartmentManagementApp()
     app.mainloop()
