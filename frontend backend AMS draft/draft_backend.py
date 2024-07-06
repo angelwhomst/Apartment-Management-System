@@ -426,43 +426,89 @@ def fetch_tenant_treeview(conn):
         print({e})
         return []
 
+def search_by_name(conn, )
 
 # ================ add_tenant PAGE FUNCTIONS =======================
+
+# def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
+#                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
+#                   emergency_contact_relationship, tenant_dob, sex):
+#     admin_id = get_admin_id(conn)
+#     if not admin_id:
+#         return
+#
+#     try:
+#         cursor = conn.cursor()
+#         cursor.execute('''INSERT INTO Tenant (
+#     admin_id,
+#     lastName,
+#     firstName,
+#     middleName,
+#     suffix,
+#     email,
+#     contact_number,
+#     move_in_date,
+#     lease_start_date,
+#     lease_end_date,
+#     Emergency_contact_name,
+#     Emergency_contact_number,
+#     Emergency_contact_relationship,
+#     tenant_dob,
+#     sex)
+#     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (admin_id, lastName, firstName, middleName, suffix, email,
+#                                                                contact_number, move_in_date,
+#                                                                lease_start_date, lease_end_date, emergency_contact_name,
+#                                                                emergency_contact_number,
+#                                                                emergency_contact_relationship, tenant_dob, sex))
+#         conn.commit()
+#     except Exception as e:
+#         print(f"Error saving tenant information: {str(e)}")
+#         conn.rollback()
 
 def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
                   emergency_contact_relationship, tenant_dob, sex):
     admin_id = get_admin_id(conn)
     if not admin_id:
-        return
+        return None  # Return None if admin_id is not available
 
     try:
         cursor = conn.cursor()
-        cursor.execute('''INSERT INTO Tenant (
-    admin_id, 
-    lastName, 
-    firstName, 
-    middleName, 
-    suffix, 
-    email, 
-    contact_number, 
-    move_in_date, 
-    lease_start_date,
-    lease_end_date, 
-    Emergency_contact_name, 
-    Emergency_contact_number, 
-    Emergency_contact_relationship, 
-    tenant_dob, 
-    sex) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (admin_id, lastName, firstName, middleName, suffix, email,
-                                                               contact_number, move_in_date,
-                                                               lease_start_date, lease_end_date, emergency_contact_name,
-                                                               emergency_contact_number,
-                                                               emergency_contact_relationship, tenant_dob, sex))
+        cursor.execute('''
+            INSERT INTO Tenant (
+                admin_id, 
+                lastName, 
+                firstName, 
+                middleName, 
+                suffix, 
+                email, 
+                contact_number, 
+                move_in_date, 
+                lease_start_date,
+                lease_end_date, 
+                Emergency_contact_name, 
+                Emergency_contact_number, 
+                Emergency_contact_relationship, 
+                tenant_dob, 
+                sex
+            ) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        ''', (admin_id, lastName, firstName, middleName, suffix, email,
+              contact_number, move_in_date,
+              lease_start_date, lease_end_date, emergency_contact_name,
+              emergency_contact_number,
+              emergency_contact_relationship, tenant_dob, sex))
+
+        # Fetch the inserted tenant_id
+        tenant_id = cursor.lastrowid
+
         conn.commit()
+        return tenant_id  # Return the inserted tenant_id
+
     except Exception as e:
         print(f"Error saving tenant information: {str(e)}")
         conn.rollback()
+        return None  # Return None on error
 
 
 def fetch_unit_numbers(conn):  # function to populate combobox
@@ -470,3 +516,72 @@ def fetch_unit_numbers(conn):  # function to populate combobox
     cursor.execute('SELECT unit_number FROM Apartment_Unit')
     unit_numbers = cursor.fetchall()
     return [unit_number[0] for unit_number in unit_numbers]
+
+
+# ================ display_tenant_details PAGE FUNCTIONS =======================
+
+def fetch_new_tenant_info(conn, tenant_id):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT
+                T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+                T.contact_number,
+                T.email,
+                AU.unit_number,
+                CASE 
+                    WHEN T.sex = 1 THEN 'Male'
+                    WHEN T.sex = 2 THEN 'Female'
+                    ELSE 'Prefer not to say'
+                END AS sex,
+                T.tenant_dob AS birthdate,
+                T.move_in_date,
+                T.lease_start_date,
+                T.lease_end_date,
+                (SELECT MAX(P.payment_date)
+                 FROM Payment P
+                 WHERE P.tenant_id = T.tenant_id) AS last_payment_date,
+                T.Emergency_contact_name,
+                T.Emergency_contact_number,
+                T.Emergency_contact_relationship
+            FROM
+                Tenant T
+                LEFT JOIN Apartment_Unit AU ON T.tenant_id = AU.tenant_id
+            WHERE
+                T.tenant_id = ?''', (tenant_id,))
+    return cursor.fetchone()
+
+
+def fetch_latest_payment(conn, tenant_id):
+    cursor = conn.cursor()
+    cursor.execute('''
+        SELECT p.payment_id, p.unit_id, p.amount, p.payment_date, p.payment_method
+        FROM Payment p
+        WHERE p.tenant_id = ?
+        ORDER BY p.payment_date DESC
+        LIMIT 1
+    ''', (tenant_id,))
+    payment_info = cursor.fetchone()
+    return payment_info
+
+# ================ expenses PAGE FUNCTIONS =======================
+
+def fetch_expense_treeview(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT expense_date, expense_amount,
+CASE 
+WHEN expense_type = 1 THEN 'Utilities'
+WHEN expense_type = 2 THEN 'Maintenance and Repairs'
+WHEN expense_type = 3 THEN 'Advertising'     
+WHEN expense_type = 4 THEN 'Insurance'
+WHEN expense_type = 5 THEN  'Administrative Costs'
+WHEN expense_type = 6 THEN 'Property Management Costs'
+END,
+description
+FROM Expenses;''')
+        rows = cursor.fetchall()
+        return rows
+
+    except Exception as e:
+        print({e})
+        return []
+

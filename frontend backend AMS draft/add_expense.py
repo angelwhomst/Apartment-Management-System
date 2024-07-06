@@ -44,7 +44,7 @@ class AddExpenseComponent:
         self.entry_expense_amount.place(relx=0.395, rely=0.605, anchor="center")
 
         # Expense Type ComboBox
-        expense_types = ['Utilities', 'Maintenance and Repairs', 'Advertising', 'Insurance' 'Administrative Costs',
+        expense_types = ['Utilities', 'Maintenance and Repairs', 'Advertising', 'Insurance', 'Administrative Costs',
                          'Property Management Costs']
         self.expense_type_var = StringVar(parent)
         self.expense_type_var.set(expense_types[0])  # Default selection
