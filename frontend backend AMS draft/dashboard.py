@@ -18,7 +18,7 @@ class DashboardFrame(BaseFrame):
         dashboard_bg_lbl.place(x=0, y=0)
 
         # Add dashboard container image
-        container_image = PIL.Image.open("images/dashcontainer.png")
+        container_image = PIL.Image.open("images/whitebgdash.png")
         container_img = ctk.CTkImage(container_image, size=(1170, 650))
         container_img_lbl = ctk.CTkLabel(self, text="", image=container_img, fg_color="white")
         container_img_lbl.place(x=333, y=120)
@@ -26,7 +26,7 @@ class DashboardFrame(BaseFrame):
         # Dashboard Label
         DashboardLabel = ctk.CTkLabel(master=self, text="Dashboard", fg_color="White",
                                       text_color="#3D291F", font=("Century Gothic", 45, "bold"))
-        DashboardLabel.place(relx=0.23, rely=0.18)
+        DashboardLabel.place(relx=0.235, rely=0.18)
 
         # Sidebar setup
         self.setup_sidebar()
@@ -39,6 +39,31 @@ class DashboardFrame(BaseFrame):
 
         # Logout Button
         self.add_logout_button()
+
+        # Add labels with placeholders
+        self.add_labels_with_placeholders()
+
+    def add_labels_with_placeholders(self):
+        labels_info = [
+            ("label_total_units", 0.2705, 0.44),
+            ("label_rental_rates", 0.5165, 0.44),
+            ("label_expiration_Alerts", 0.7630, 0.44),
+            ("label_recent_tenants", 0.2705, 0.7455),
+            ("label_monthly_earnings", 0.5165, 0.7455),
+            ("label_maintenance_requests", 0.7630, 0.7455)
+        ]
+
+        for label_name, relx, rely in labels_info:
+            var = ctk.StringVar()
+            var.set("#")
+            setattr(self, label_name, var)
+
+            label_frame = ctk.CTkFrame(self, fg_color="#E6E1DD", width=100, height=100)
+            label_frame.place(relx=relx, rely=rely, anchor="center")
+
+            label = ctk.CTkLabel(label_frame, textvariable=var, fg_color="#E6E1DD", text_color="#3D291F",
+                                 width=100, height=100, font= ("Century Gothic", 50, "bold"))
+            label.place(relx=0.5, rely=0.5, anchor="center")
 
     def add_admin_tool_button(self):
         admin_icon_image = PIL.Image.open("images/toolIcon.png")

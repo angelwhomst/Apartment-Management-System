@@ -14,14 +14,16 @@ class BaseFrame(CTkFrame):
         from payment_management import PaymentManagementFrame
         from report import ReportFrame
         from building_information import BuildingInformationFrame
+        from expenses import ExpenseFrame
 
         buttons_info = [
             ("   Owner Dashboard       ", 0.4, DashboardFrame),
-            ("  Units Information          ", 0.46, UnitsInfoFrame),
-            ("  Tenants Information    ", 0.52, TenantInformationFrame),
-            ("     Payment Management", 0.58, PaymentManagementFrame),
-            ("   Report                           ", 0.64, ReportFrame),
-            (" Building Information  ", 0.70, BuildingInformationFrame)
+            ("  Units Information          ", 0.52, UnitsInfoFrame),
+            ("  Tenants Information    ", 0.58, TenantInformationFrame),
+            ("     Payment Management", 0.64, PaymentManagementFrame),
+            (" Expenses                     ", 0.70, ExpenseFrame),
+            ("Building Information  ", 0.46, BuildingInformationFrame),
+            ("   Report                           ", 0.76, ReportFrame),
         ]
 
         # Add sidebar background image
