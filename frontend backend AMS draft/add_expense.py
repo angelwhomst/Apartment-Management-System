@@ -1,10 +1,23 @@
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, END
 import customtkinter as ctk
 from add_unit import AddUnitComponent
 from tkcalendar import DateEntry  # Assuming you have tkcalendar installed for DateEntry
 from tkinter import StringVar
+import draft_backend
+
+
+# mapping from combobox values to database int values for expense_type
+expense_type_mapping = {
+    'Utilities': 1,
+    'Maintenance and Repairs': 2,
+    'Advertising': 3,
+    'Insurance': 4,
+    'Administrative Costs': 5,
+    'Property Management Costs': 6
+}
 
 class AddExpenseComponent:
     def __init__(self, parent):
@@ -30,13 +43,14 @@ class AddExpenseComponent:
                                                  border_color="#937A69", font=('Century Gothic', 15))
         self.entry_expense_amount.place(relx=0.395, rely=0.605, anchor="center")
 
-        # Expense Type ComboBox blah blah
-        expense_types = ['Type A', 'Type B', 'Type C']  # Replace with your actual types
+        # Expense Type ComboBox
+        expense_types = ['Utilities', 'Maintenance and Repairs', 'Advertising', 'Insurance' 'Administrative Costs',
+                         'Property Management Costs']
         self.expense_type_var = StringVar(parent)
         self.expense_type_var.set(expense_types[0])  # Default selection
-        self.entry_expense_type = ctk.CTkComboBox(parent, width=250, height=25, border_color="#937A69",
+        self.entry_expense_type = ctk.CTkComboBox(parent, values=expense_types, width=250, height=25, border_color="#937A69",
                                                   font=('Century Gothic', 15))
-        self.entry_expense_type['values'] = expense_types
+        # self.entry_expense_type['values'] = expense_types
         self.entry_expense_type.place(relx=0.395, rely=0.675, anchor="center")
 
         # Description Entry as CTkEntry
@@ -53,10 +67,43 @@ class AddExpenseComponent:
             "font": ('Century Gothic', 20, "bold")
         }
 
-        save_button = ctk.CTkButton(parent, text="Save", **button_style)
+        save_button = ctk.CTkButton(parent, text="Save", command=self.save_expense, **button_style)
 
         # Place the buttons
         save_button.place(relx=0.85, rely=0.90, anchor='center')
+
+    def save_expense(self):
+        # Collect data from the entry fields
+        expense_date = self.entry_expense_date.get_date()
+        expense_amount = self.entry_expense_amount.get()
+        expense_type = self.entry_expense_type.get()
+        description = self.entry_description.get()
+
+        # map the selected expense type to its integer value
+        expense_type_int = expense_type_mapping.get(expense_type)
+
+        # proceed to save data to the database
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+        try:
+            draft_backend.insert_expense(conn, expense_date, expense_amount, expense_type_int, description)
+            CTkMessagebox(title="Success", message="Expense information saved successfully!")
+
+            # # fetches the expense_id of the newly inserted expense to immediately display
+            # self.display_unit_id = draft_backend.fetch_latest_unit_id(conn)
+            self.clear_entry_fields()
+            # self.show_unit_info()
+        except Exception as e:
+            CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
+        finally:
+            conn.close()
+
+    def clear_entry_fields(self):
+        self.entry_expense_date.delete(0, END)
+        self.entry_expense_amount.delete(0, END)
+        self.entry_description.delete(0, END)
 
     def save_building_info(self):
         # Close the Add Building window if it exists

@@ -6,7 +6,7 @@ import customtkinter as ctk
 from customtkinter import CTkEntry, CTkButton, CTkLabel, CTkComboBox
 import draft_backend
 
-# mapping from the combo box values to their respective integer values for availability_status
+# mapping from the combobox values to their respective integer values for availability_status
 availability_status_mapping = {
     "Available": 1,
     "Occupied": 2,
@@ -126,7 +126,7 @@ class AddUnitComponent:
             # fetch the unit_id of the newly inserted building
             self.display_unit_id = draft_backend.fetch_latest_unit_id(conn)
 
-            # fetches the unit_id of the newly inserted building to immediately display
+            # fetches the unit_id of the newly inserted unit to immediately display
             self.display_unit_id = draft_backend.fetch_latest_unit_id(conn)
             self.clear_entry_fields()
             self.show_unit_info()

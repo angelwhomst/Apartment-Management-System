@@ -123,7 +123,7 @@ def create_tables(conn):
     admin_id       INTEGER,
     expense_date   DATE    NOT NULL,
     expense_amount DOUBLE  NOT NULL,
-    expense_type   INTEGER,
+    expense_type   INTEGER, -- 1='utilities', 2='maintenance and repairs', 3='advertising', 4='insurance', 5='administrative costs', 6='property management costs'
     description    TEXT,
     FOREIGN KEY (
         admin_id
@@ -370,3 +370,28 @@ def fetch_new_unit_info(conn, unit_id):
     unit_info = cursor.fetchone()  # fetch one row
     return unit_info
 
+# ================ Add Expense PAGE FUNCTIONS =======================
+
+
+def insert_expense(conn, expense_date, expense_amount, expense_type, description):
+    admin_id = get_admin_id(conn)
+    if not admin_id:
+        return
+
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''INSERT INTO Expenses(admin_id, expense_date, expense_amount, expense_type, description)
+                        VALUES (?, ?, ?, ?, ?);''', (admin_id, expense_date, expense_amount, expense_type, description))
+        conn.commit()
+        print("Expense saved successfully.")
+    except Exception as e:
+        print(f"Error saving unit information: {str(e)}")
+        conn.rollback()
+
+
+# ================ Display Expense PAGE FUNCTIONS =======================
+
+def fetch_latest_expense_id(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT max(expense_id) FROM Expenses;')
+    return cursor.fetchone()[0]
