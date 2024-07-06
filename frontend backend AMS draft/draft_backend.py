@@ -426,7 +426,39 @@ def fetch_tenant_treeview(conn):
         print({e})
         return []
 
-def search_by_name(conn, )
+
+def fetch_tenants_by_name(conn, search_name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT
+                AB.building_name,
+                AU.unit_number,
+                T.firstName || ' ' || T.lastName AS tenant_name,
+                T.contact_number,
+                CASE
+                    WHEN P.payment_id IS NOT NULL THEN 'Paid'
+                    ELSE 'Not Paid'
+                END AS payment_status,
+                T.lease_start_date
+            FROM Tenant AS T
+            INNER JOIN Apartment_Unit AS AU
+                ON T.tenant_id = AU.tenant_id
+            INNER JOIN Apartment_Building AS AB
+                ON AU.building_id = AB.building_id
+            LEFT JOIN Payment AS P
+                ON T.tenant_id = P.tenant_id
+                AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date
+            WHERE (T.firstName LIKE '%' || ? || '%' OR T.middleName LIKE '%' || ? || '%' OR T.lastName LIKE '%' || ? || '%')
+        ''', (search_name, search_name, search_name))
+
+        # Fetch all rows matching the search criteria
+        tenant_data = cursor.fetchall()
+        return tenant_data
+
+    except Exception as e:
+        print(f"Error executing search query: {str(e)}")
+        return None
 
 # ================ add_tenant PAGE FUNCTIONS =======================
 
@@ -585,3 +617,9 @@ FROM Expenses;''')
         print({e})
         return []
 
+# ================ recent_tenants PAGE FUNCTIONS =======================
+
+# def fetch_recent_tenants(conn):
+#     try:
+#         cursor = conn.cursor()
+#         cursor.execute('''''')
