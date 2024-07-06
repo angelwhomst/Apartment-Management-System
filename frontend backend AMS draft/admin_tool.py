@@ -28,8 +28,8 @@ class AdminToolComponent:
 
         button1 = ctk.CTkButton(parent, text="Add", width=175, command=self.open_add_building, **button_style)
         button2 = ctk.CTkButton(parent, text="Add", width=175, command=self.open_add_unit, **button_style)
-        button3 = ctk.CTkButton(parent, text="Add", width=175, **button_style)
-        button4 = ctk.CTkButton(parent, text="Add", width=175, **button_style)
+        button3 = ctk.CTkButton(parent, text="Add", width=175, command=self.open_add_tenant, **button_style)
+        button4 = ctk.CTkButton(parent, text="Add", width=175, command=self.open_add_expense, **button_style)
 
         # Place the buttons on the same line with closer margins
         button1.place(relx=0.16, rely=0.74, anchor='center')
@@ -127,9 +127,77 @@ class AdminToolComponent:
         # Create an instance of AddUnitComponent and pass the new window as its parent
         AddUnitComponent(add_unit_window)
 
-# Entry point for running the AdminToolComponent directly
-if __name__ == "__main__":
-    root = tk.Tk()
-    admin_tool = AdminToolComponent(root)
-    admin_tool.open_admin_tool()
-    root.mainloop()
+    def open_add_tenant(self):
+        # Importing inside the method to avoid circular import
+        from PIL import Image
+        from add_tenant import AddTenantComponent
+
+        # Create a new CTkToplevel window for the Add Unit component
+        add_tenant_window = ctk.CTkToplevel(self.parent)
+        add_tenant_window.title("Add Unit")
+        add_tenant_window.geometry("900x600")
+
+        # Disable window resizing
+        add_tenant_window.resizable(False, False)
+
+        # Center the new window on the screen
+        self.parent.update_idletasks()
+        screen_width = self.parent.winfo_screenwidth()
+        screen_height = self.parent.winfo_screenheight()
+        window_width = 900
+        window_height = 600
+
+        position_right = int(screen_width / 2 - window_width / 2)
+        position_down = int(screen_height / 2 - window_height / 2)
+
+        add_tenant_window.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
+
+        # Ensure the new window is always on top
+        add_tenant_window.attributes('-topmost', True)
+
+        # Close the admin tool window
+        self.top_level_window.destroy()
+
+        # Create an instance of AddUnitComponent and pass the new window as its parent
+        AddTenantComponent(add_tenant_window)
+
+    def open_add_expense(self):
+        # Importing inside the method to avoid circular import
+        from PIL import Image
+        from add_expense import AddExpenseComponent
+
+        # Create a new CTkToplevel window for the Add Unit component
+        add_tenant_window = ctk.CTkToplevel(self.parent)
+        add_tenant_window.title("Add Unit")
+        add_tenant_window.geometry("900x600")
+
+        # Disable window resizing
+        add_tenant_window.resizable(False, False)
+
+        # Center the new window on the screen
+        self.parent.update_idletasks()
+        screen_width = self.parent.winfo_screenwidth()
+        screen_height = self.parent.winfo_screenheight()
+        window_width = 900
+        window_height = 600
+
+        position_right = int(screen_width / 2 - window_width / 2)
+        position_down = int(screen_height / 2 - window_height / 2)
+
+        add_tenant_window.geometry(f"{window_width}x{window_height}+{position_right}+{position_down}")
+
+        # Ensure the new window is always on top
+        add_tenant_window.attributes('-topmost', True)
+
+        # Close the admin tool window
+        self.top_level_window.destroy()
+
+        # Create an instance of AddUnitComponent and pass the new window as its parent
+        AddExpenseComponent(add_tenant_window)
+#
+# # Entry point for running the AdminToolComponent directly
+# if __name__ == "__main__":
+#     root = tk.Tk()
+#     admin_tool = AdminToolComponent(root)
+#     admin_tool.open_admin_tool()
+#     root.mainloop()
