@@ -30,7 +30,7 @@ class AddExpenseComponent:
                                                  border_color="#937A69", font=('Century Gothic', 15))
         self.entry_expense_amount.place(relx=0.395, rely=0.605, anchor="center")
 
-        # Expense Type ComboBox
+        # Expense Type ComboBox blah blah
         expense_types = ['Type A', 'Type B', 'Type C']  # Replace with your actual types
         self.expense_type_var = StringVar(parent)
         self.expense_type_var.set(expense_types[0])  # Default selection
