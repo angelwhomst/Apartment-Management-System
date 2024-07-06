@@ -89,7 +89,6 @@ def create_tables(conn):
     tenant_photo                   BLOB,
     tenant_dob                     DATE,
     sex                            INTEGER,
-    nationality                    VARCHAR (100),
     income                         DOUBLE,
     FOREIGN KEY (
         admin_id
@@ -432,7 +431,7 @@ def fetch_tenant_treeview(conn):
 
 def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
-                  emergency_contact_relationship, tenant_dob, sex, nationality, income):
+                  emergency_contact_relationship, tenant_dob, sex):
     admin_id = get_admin_id(conn)
     if not admin_id:
         return
@@ -454,16 +453,20 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
     Emergency_contact_number, 
     Emergency_contact_relationship, 
     tenant_dob, 
-    sex, 
-    nationality, 
-    income
-) VALUES (
-    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-);
-''', (admin_id, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
-      lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
-      emergency_contact_relationship, tenant_dob, sex, nationality, income))
+    sex) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (admin_id, lastName, firstName, middleName, suffix, email,
+                                                               contact_number, move_in_date,
+                                                               lease_start_date, lease_end_date, emergency_contact_name,
+                                                               emergency_contact_number,
+                                                               emergency_contact_relationship, tenant_dob, sex))
         conn.commit()
     except Exception as e:
         print(f"Error saving tenant information: {str(e)}")
         conn.rollback()
+
+
+def fetch_unit_numbers(conn):  # function to populate combobox
+    cursor = conn.cursor()
+    cursor.execute('SELECT unit_number FROM Apartment_Unit')
+    unit_numbers = cursor.fetchall()
+    return [unit_number[0] for unit_number in unit_numbers]

@@ -1,6 +1,7 @@
 import tkinter as tk
 import customtkinter as ctk
 
+
 class AdminToolComponent:
     def __init__(self, parent):
         self.parent = parent
@@ -134,7 +135,7 @@ class AdminToolComponent:
 
         # Create a new CTkToplevel window for the Add Unit component
         add_tenant_window = ctk.CTkToplevel(self.parent)
-        add_tenant_window.title("Add Unit")
+        add_tenant_window.title("Add Tenant")
         add_tenant_window.geometry("900x600")
 
         # Disable window resizing
@@ -168,7 +169,7 @@ class AdminToolComponent:
 
         # Create a new CTkToplevel window for the Add Unit component
         add_tenant_window = ctk.CTkToplevel(self.parent)
-        add_tenant_window.title("Add Unit")
+        add_tenant_window.title("Add Expense")
         add_tenant_window.geometry("900x600")
 
         # Disable window resizing
@@ -194,10 +195,12 @@ class AdminToolComponent:
 
         # Create an instance of AddUnitComponent and pass the new window as its parent
         AddExpenseComponent(add_tenant_window)
+
+
 #
-# # Entry point for running the AdminToolComponent directly
-# if __name__ == "__main__":
-#     root = tk.Tk()
-#     admin_tool = AdminToolComponent(root)
-#     admin_tool.open_admin_tool()
-#     root.mainloop()
+# Entry point for running the AdminToolComponent directly
+if __name__ == "__main__":
+    root = tk.Tk()
+    admin_tool = AdminToolComponent(root)
+    admin_tool.open_admin_tool()
+    root.mainloop()

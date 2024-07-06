@@ -90,11 +90,7 @@ class AddExpenseComponent:
         try:
             draft_backend.insert_expense(conn, expense_date, expense_amount, expense_type_int, description)
             CTkMessagebox(title="Success", message="Expense information saved successfully!")
-
-            # # fetches the expense_id of the newly inserted expense to immediately display
-            # self.display_unit_id = draft_backend.fetch_latest_unit_id(conn)
             self.clear_entry_fields()
-            # self.show_unit_info()
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
         finally:

@@ -104,9 +104,6 @@ class DisplayTenantComponent:
         save_button = ctk.CTkButton(parent, text="Save", command=self.edit_tenant_info, **button_style)
         save_button.place(relx=0.85, rely=0.90, anchor='center')
 
-        # Labels with variable text
-        label1 = CTkLabel(parent, textvariable=self.label1_var, font=('Century Gothic', 12))
-        label1.place(relx=0.5, rely=0.1, anchor='center')
 
     def edit_tenant_info(self):
         # Close the Add Building window if it exists

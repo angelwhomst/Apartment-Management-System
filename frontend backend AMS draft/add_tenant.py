@@ -1,8 +1,16 @@
 import tkinter as tk
+from CTkMessagebox import CTkMessagebox
 from tkcalendar import DateEntry
 import customtkinter as ctk
 from PIL import Image
 from customtkinter import CTkEntry, CTkComboBox
+import draft_backend
+
+sex_mapping = {
+    'Male': 1,
+    'Female': 2,
+    'Prefer not to say': 3
+}
 
 
 class AddTenantComponent:
@@ -20,10 +28,25 @@ class AddTenantComponent:
         building_bg_lbl.place(x=0, y=0)
 
         # Entry fields/Combo box
-        self.entry_tenant_name = CTkEntry(parent, placeholder_text="Enter tenant name", width=240, height=25,
+        self.entry_first_name = CTkEntry(parent, placeholder_text="First name", width=80, height=25,
+                                         border_color="#937A69",
+                                         font=('Century Gothic', 12))
+        self.entry_first_name.place(relx=0.090, rely=0.425, anchor="center")
+
+        self.entry_middle_name = CTkEntry(parent, placeholder_text="Middle name", width=80, height=25,
                                           border_color="#937A69",
                                           font=('Century Gothic', 12))
-        self.entry_tenant_name.place(relx=0.310, rely=0.425, anchor="center")
+        self.entry_middle_name.place(relx=0.194, rely=0.425, anchor="center")
+
+        self.entry_last_name = CTkEntry(parent, placeholder_text="Last name", width=80, height=25,
+                                        border_color="#937A69",
+                                        font=('Century Gothic', 12))
+        self.entry_last_name.place(relx=0.296, rely=0.425, anchor="center")
+
+        self.entry_suffix_name = CTkEntry(parent, placeholder_text="Suffix", width=80, height=25,
+                                          border_color="#937A69",
+                                          font=('Century Gothic', 12))
+        self.entry_suffix_name.place(relx=0.400, rely=0.425, anchor="center")
 
         self.entry_contactnum = CTkEntry(parent, placeholder_text="Enter contact number", width=240, height=25,
                                          border_color="#937A69",
@@ -35,12 +58,18 @@ class AddTenantComponent:
                                     font=('Century Gothic', 12))
         self.entry_email.place(relx=0.310, rely=0.539, anchor="center")
 
-        self.entry_unit_number = CTkEntry(parent, placeholder_text="Enter unit number", width=240, height=25,
-                                          border_color="#937A69",
-                                          font=('Century Gothic', 12))
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+        unit_numbers = draft_backend.fetch_unit_numbers(conn)
+        conn.close()
+
+        self.entry_unit_number = CTkComboBox(parent, width=240, values=unit_numbers, height=25, border_color="#937A69",
+                                             font=('Century Gothic', 12))
         self.entry_unit_number.place(relx=0.310, rely=0.596, anchor="center")
 
-        self.combo_box_sex = CTkComboBox(parent, width=240, height=25,
+        self.combo_box_sex = CTkComboBox(parent, values=['Male', 'Female', 'Prefer not to say'], width=240, height=25,
                                          border_color="#937A69",
                                          font=('Century Gothic', 12))
         self.combo_box_sex.place(relx=0.310, rely=0.653, anchor="center")
@@ -49,9 +78,8 @@ class AddTenantComponent:
                                          font=('Century Gothic', 12))
         self.entry_birthdate.place(relx=0.310, rely=0.710, anchor="center")
 
-        self.entry_move_in = CTkEntry(parent, placeholder_text="Enter move in date", width=150, height=25,
-                                      border_color="#937A69",
-                                      font=('Century Gothic', 12))
+        # self.entry_move_in = CTkEntry(parent, placeholder_text="Enter move in date", width=150, height=25, border_color="#937A69",
+        #                               font=('Century Gothic', 12))
         self.entry_move_in = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2,
                                        selectbackground='#937A69',
                                        font=('Century Gothic', 12))
@@ -102,9 +130,48 @@ class AddTenantComponent:
         save_button.place(relx=0.85, rely=0.90, anchor='center')
 
     def save_tenant_info(self):
-        # collect data from the entry fields
-        first_name = self.entry_tenant_name
+        # collect data from the entry fields/user input
+        first_name = self.entry_first_name.get()
+        middle_name = self.entry_middle_name.get()
+        last_name = self.entry_last_name.get()
+        suffix = self.entry_suffix_name.get()
+        contact_number = self.entry_contactnum.get()
+        email = self.entry_email.get()
+        unit_number = self.entry_unit_number.get()
+        sex = self.combo_box_sex.get()
+        birthdate = self.entry_birthdate.get_date()
+        move_in_date = self.entry_move_in.get_date()
+        lease_start_date = self.entry_lease_start.get_date()
+        lease_end_date = self.entry_lease_end.get_date()
+        # last_payment_date = self.entry_last_payment.get_date()
+        emergency_contact_number = self.entry_emergency_contact_number.get()
+        emergency_contact_name = self.entry_emergency_contact_name.get()
+        emergency_contact_relationship = self.entry_relationship.get()
 
+        # map the selected sex to its integer value
+        sex_int = sex_mapping.get(sex)
+
+        # Validate required fields
+        if not unit_number or not last_name or not first_name:
+            CTkMessagebox(title="Error", message="All fields are required.")
+            return
+
+        # proceed to save data to the database
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+        try:
+            draft_backend.insert_tenant(conn, last_name, first_name, middle_name, suffix, email, contact_number,
+                                        move_in_date,
+                                        lease_start_date, lease_end_date, emergency_contact_name,
+                                        emergency_contact_number,
+                                        emergency_contact_relationship, birthdate, sex_int)
+            CTkMessagebox(title="Success", message="Tenant information saved successfully!")
+        except Exception as e:
+            CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
+        finally:
+            conn.close()
 
         # Close the Add Building window if it exists
         if self.add_building_window:
