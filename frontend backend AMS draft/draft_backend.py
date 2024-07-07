@@ -90,7 +90,7 @@ def create_tables(conn):
     tenant_dob                     DATE,
     sex                            INTEGER,
     income                         DOUBLE,
-    is_deleted      INTEGER      DEFAULT (0)
+    is_deleted      INTEGER      DEFAULT (0),
     FOREIGN KEY (
         admin_id
     )
@@ -740,17 +740,40 @@ def count_under_maintenance_units(conn):
 # ================ See More rental_rates FUNCTIONS =======================
 def average_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT AVG (rental_rate) avg_rental_rate FROM Apartment_Unit')
+    cursor.execute('SELECT AVG (rental_rate) FROM Apartment_Unit')
     return cursor.fetchone()[0]
 
 
 def maximum_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT MAX (rental_rate) max_rental_rate FROM Apartment_Unit')
+    cursor.execute('SELECT MAX (rental_rate) FROM Apartment_Unit')
     return cursor.fetchone()[0]
 
 
 def minimum_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT MIN (rental_rate) min_rental_rate FROM Apartment_Unit')
+    cursor.execute('SELECT MIN (rental_rate) FROM Apartment_Unit')
     return cursor.fetchone()[0]
+
+
+# ================ See More monthly_earnings FUNCTIONS =======================
+def rent_collection(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT SUM(amount) FROM Payment;')
+    return cursor.fetchone()[0]
+
+
+def monthly_expense(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT SUM(expense_amount) FROM Expenses;')
+    return cursor.fetchone()[0]
+
+
+def monthly_earnings(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT (SELECT COALESCE(SUM(expense_amount), 0) FROM Expenses) - (SELECT COALESCE(SUM(amount), 0) 
+                        FROM Payment) AS earnings;
+                        -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
+''')
+    return cursor.fetchone()[0]
+
