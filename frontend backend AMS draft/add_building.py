@@ -101,6 +101,12 @@ class AddBuildingComponent:
             return
 
         try:
+            # checks if the building already exists
+            if draft_backend.check_building_exists(conn, building_name):
+                CTkMessagebox(title="Error", message="Building with this name already exists.")
+                return
+
+            # proceeds to insert data
             draft_backend.insert_building(conn, building_name, country, province, city, street, lot_number, zip_code,
                                           amenities)
             CTkMessagebox(title="Success", message="Building information saved successfully!")

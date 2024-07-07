@@ -249,13 +249,19 @@ def fetch_latest_building_id(conn):
     return cursor.fetchone()[0]
 
 
-# ================ Display Building PAGE FUNCTIONS =======================
+# ================ display_building PAGE FUNCTIONS =======================
 def fetch_new_building_info(conn, building_id):
     # fetch building information from the database based on building_id
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM Apartment_Building WHERE building_id = ?", (building_id,))
     building_info = cursor.fetchone()  # one row is fetched
     return building_info
+
+# for testing only
+def fetch_building_treeview(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT building_id, building_name, country, amenities FROM Apartment_Building;')
+    return cursor.fetchall()
 
 
 # ================ Edit Building PAGE FUNCTIONS =======================
@@ -465,41 +471,6 @@ def fetch_tenants_by_name(conn, search_name):
 
 # ================ add_tenant PAGE FUNCTIONS =======================
 
-# def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
-#                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
-#                   emergency_contact_relationship, tenant_dob, sex):
-#     admin_id = get_admin_id(conn)
-#     if not admin_id:
-#         return
-#
-#     try:
-#         cursor = conn.cursor()
-#         cursor.execute('''INSERT INTO Tenant (
-#     admin_id,
-#     lastName,
-#     firstName,
-#     middleName,
-#     suffix,
-#     email,
-#     contact_number,
-#     move_in_date,
-#     lease_start_date,
-#     lease_end_date,
-#     Emergency_contact_name,
-#     Emergency_contact_number,
-#     Emergency_contact_relationship,
-#     tenant_dob,
-#     sex)
-#     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);''', (admin_id, lastName, firstName, middleName, suffix, email,
-#                                                                contact_number, move_in_date,
-#                                                                lease_start_date, lease_end_date, emergency_contact_name,
-#                                                                emergency_contact_number,
-#                                                                emergency_contact_relationship, tenant_dob, sex))
-#         conn.commit()
-#     except Exception as e:
-#         print(f"Error saving tenant information: {str(e)}")
-#         conn.rollback()
-
 def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
                   emergency_contact_relationship, tenant_dob, sex):
@@ -657,8 +628,8 @@ def fetch_recent_tenants(conn):
         ON AU.building_id = AB.building_id
     LEFT JOIN Payment AS P
         ON T.tenant_id = P.tenant_id
-        WHERE move_in_date >= DATE('now', '-30 days')
-ORDER BY move_in_date DESC;''')
+        WHERE T.move_in_date >= DATE('now', '-30 days') AND T.is_deleted = 0
+    ORDER BY move_in_date DESC;''')
         rows = cursor.fetchall()
         return rows
     except Exception as e:
