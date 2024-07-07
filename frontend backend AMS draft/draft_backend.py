@@ -663,3 +663,29 @@ ORDER BY move_in_date DESC;''')
         print({e})
         return []
 
+
+def fetch_lease_expiration_alerts(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+        AB.building_name,
+        AU.unit_number,
+        T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+        T.contact_number,
+        T.move_in_date,
+        T.lease_start_date,
+        T.lease_end_date
+    FROM Tenant AS T
+    INNER JOIN Apartment_Unit AS AU
+        ON T.tenant_id = AU.unit_id
+    INNER JOIN Apartment_Building AS AB
+        ON AU.building_id = AB.building_id
+    LEFT JOIN Payment AS P
+        ON T.tenant_id = P.tenant_id
+        WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
+    ORDER BY lease_end_date ASC;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []

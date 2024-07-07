@@ -3,11 +3,13 @@ from tkinter import ttk
 from tkinter import Scrollbar
 from PIL import Image
 import customtkinter as ctk
+import draft_backend
 
 class LeaseExpirationAlertComponent:
     def __init__(self, parent):
         self.parent = parent
         self.create_widgets()
+        self.populate_treeview()
 
     def create_widgets(self):
         # Create TopLevel window
@@ -54,35 +56,17 @@ class LeaseExpirationAlertComponent:
         # Place Treeview inside the Frame
         self.tree.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-        # Example data (adjust as needed)
-        data = [
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
+    def populate_treeview(self):
+        conn = draft_backend.get_db_connection()
+        if conn:
+            lease_expiration = draft_backend.fetch_lease_expiration_alerts(conn)
+            conn.close()
+            # Insert data into Treeview
+            for row in lease_expiration:
+                self.tree.insert("", "end", values=row)
 
-            # Add more data if needed
-        ]
 
-        # Insert example data into Treeview
-        for item in data:
-            self.tree.insert('', 'end', values=item)
-
-# Entry point for running the LeaseExpirationAlertComponent directly
+# FOR TESTING Entry point for running the LeaseExpirationAlertComponent directly
 if __name__ == "__main__":
     root = tk.Tk()
     admin_tool = LeaseExpirationAlertComponent(root)
