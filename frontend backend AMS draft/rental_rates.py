@@ -61,7 +61,7 @@ class MonthlyRatesComponent(ctk.CTkFrame):
         self.create_widgets()
 
 
-
+# FOR TESTING ONLY
 if __name__ == "__main__":
     root = ctk.CTk()
     admin_tool = MonthlyRatesComponent(root)
