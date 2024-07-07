@@ -69,6 +69,8 @@ class TotalUnitsComponent(ctk.CTkFrame):
     def open_total_units(self):
         self.create_widgets()
 
+
+# FOR TESTING
 if __name__ == "__main__":
     root = ctk.CTk()
     admin_tool = TotalUnitsComponent(root)
