@@ -13,6 +13,7 @@ import draft_backend
 class TenantInformationFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
+        self.search_entry = None
         self.create_widgets()
         self.populate_treeview()
 
@@ -152,7 +153,7 @@ class TenantInformationFrame(BaseFrame):
         search_button.place(relx=0.820, rely=0.295)
 
     def perform_search(self):
-        search_name = self.add_search_entry().get()  # Corrected to use self.search_entry
+        search_name = self.search_entry.get()  # Corrected to use self.search_entry
         conn = draft_backend.get_db_connection()
         if conn:
             try:
@@ -174,9 +175,10 @@ class TenantInformationFrame(BaseFrame):
                 conn.close()
 
     def search_tenants(self, search_term):
-        # Replace this with actual search logic
-        data = self.get_tenant_data()
-        return [item for item in data if search_term.lower() in item[2].lower()]
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+
 
     def update_treeview_with_search_results(self, results):
         # Clear existing data in the Treeview
@@ -199,6 +201,6 @@ class TenantInformationFrame(BaseFrame):
         self.search_entry.delete(0, tk.END)
         self.search_entry.insert(0, "Search Name...")
         # Re-populate treeview with all data
-        self.populate_treeview_with_data()
+        self.populate_treeview()
 
-# The remaining implementation for BaseFrame, LoginFrame, ProfileFrame, and app setup is assumed to be handled elsewhere in your codebase.
+

@@ -66,7 +66,11 @@ class ExpenseFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Building Name", "Unit Number", "Name", "Contact Number", "Status", "Start Date")
-        self.tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=("hidden_id", *columns), show='headings')
+
+        # Hide the ID column
+        self.tree.column("hidden_id", width=0, stretch=False)
+        self.tree.heading("hidden_id", text="")
 
         # Define headings with adjusted styles
         for col in columns:
@@ -95,10 +99,10 @@ class ExpenseFrame(BaseFrame):
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
         if conn:
-            tenant_data = draft_backend.fetch_tenant_treeview(conn)
+            expenses = draft_backend.fetch_expense_treeview(conn)
             conn.close()
             # Insert data into Treeview
-            for row in tenant_data:
+            for row in expenses:
                 self.tree.insert("", "end", values=row)
 
     def add_profile_button(self):
