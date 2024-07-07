@@ -1,6 +1,5 @@
 import sqlite3
 import hashlib
-from sqlite3 import Error
 
 
 def get_db_connection():
@@ -256,6 +255,7 @@ def fetch_new_building_info(conn, building_id):
     cursor.execute("SELECT * FROM Apartment_Building WHERE building_id = ?", (building_id,))
     building_info = cursor.fetchone()  # one row is fetched
     return building_info
+
 
 # for testing only
 def fetch_building_treeview(conn):
@@ -516,7 +516,6 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
         conn.rollback()
         return None  # Return None on error
 
-
 def fetch_unit_numbers(conn):  # function to populate combobox
     cursor = conn.cursor()
     cursor.execute('SELECT unit_number FROM Apartment_Unit')
@@ -550,10 +549,11 @@ def fetch_new_tenant_info(conn, tenant_id):
                 T.Emergency_contact_relationship
             FROM
                 Tenant T
-                LEFT JOIN Apartment_Unit AU ON T.tenant_id = AU.tenant_id
+                LEFT JOIN Apartment_Unit AU ON T.tenant_id = AU.unit_id
             WHERE
                 T.tenant_id = ?''', (tenant_id,))
-    return cursor.fetchone()
+    result = cursor.fetchone()
+    return result
 
 
 def fetch_latest_payment(conn, tenant_id):
@@ -747,4 +747,3 @@ def monthly_earnings(conn):
                         -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
 ''')
     return cursor.fetchone()[0]
-

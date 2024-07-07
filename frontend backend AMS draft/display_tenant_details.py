@@ -30,7 +30,12 @@ class DisplayTenantComponent:
         self.emergency_contact_name_var = StringVar()
         self.relationship_var = StringVar()
 
+        # Create widgets first
         self.create_widgets(parent)
+
+        # Populate tenant info after widgets are created
+        if self.tenant_id:
+            self.populate_tenant_info()
 
     def create_widgets(self, parent):
         # Add background image
@@ -118,89 +123,53 @@ class DisplayTenantComponent:
     def populate_tenant_info(self):
         conn = draft_backend.get_db_connection()
         if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
             return
 
         try:
+            print(f"Populating info for tenant_id: {self.tenant_id}")
             tenant_info = draft_backend.fetch_new_tenant_info(conn, self.tenant_id)
             if tenant_info:
-                self.tenant_name_var.set(tenant_info['lastName'] + ", " + tenant_info['firstName'])
-                self.contactnum_var.set(tenant_info['contact_number'])
-                self.email_var.set(tenant_info['email'])
+                print(f"Fetched tenant info: {tenant_info}")
+                self.tenant_name_var.set(tenant_info[0])
+                self.contactnum_var.set(tenant_info[1])
+                self.email_var.set(tenant_info[2])
+                self.unit_number_var.set(tenant_info[3])
+                self.sex_var.set(tenant_info[4])
+                self.birthdate_var.set(tenant_info[5])
+                self.move_in_var.set(tenant_info[6])
+                self.lease_start_var.set(tenant_info[7])
+                self.lease_end_var.set(tenant_info[8])
+                self.last_payment_var.set(tenant_info[9])
+                self.emergency_contact_name_var.set(tenant_info[10])
+                self.emergency_contact_number_var.set(tenant_info[11])
+                self.relationship_var.set(tenant_info[12])
 
-                latest_payment = draft_backend.fetch_latest_payment(conn, self.tenant_id)
-                if latest_payment:
-                    unit_id = latest_payment['unit_id']
-                    unit_info = draft_backend.fetch_new_unit_info(conn, unit_id)
-                    if unit_info:
-                        self.unit_number_var.set(unit_info['unit_number'])
+                # Disable entry fields after populating them
+                self.disable_fields()
 
-                        # Disable entry fields after populating them
-                        self.entry_tenant_name.configure(state="disabled")
-                        self.entry_contactnum.configure(state="disabled")
-                        self.entry_email.configure(state="disabled")
-                        self.entry_unit_number.configure(state="disabled")
-                        self.entry_sex.configure(state="disabled")
-                        self.entry_birthdate.configure(state="disabled")
-                        self.entry_move_in.configure(state="disabled")
-                        self.entry_lease_start.configure(state="disabled")
-                        self.entry_lease_end.configure(state="disabled")
-                        self.entry_last_payment.configure(state="disabled")
-                        self.entry_emergency_contact_number.configure(state="disabled")
-                        self.entry_emergency_contact_name.configure(state="disabled")
-                        self.entry_relationship.configure(state="disabled")
-                    else:
-                        CTkMessagebox(title="Unit Information Error", message=f"Unit information not found for Unit ID: {unit_id}")
-                else:
-                    CTkMessagebox(title="Payment Error",
-                                  message=f"No payment found for Tenant ID: {self.tenant_id}")
             else:
-                # Handle case where no tenant info found
-                CTkMessagebox(title="Error", message=f"Tenant information not found for ID: {self.tenant_id}")
-
+                CTkMessagebox(title="Error", message="Tenant not found.")
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
         finally:
             conn.close()
 
-        # tenant_info = draft_backend.fetch_new_tenant_info(conn, self.tenant_id)
-        #     if tenant_info:
-        #         self.tenant_name_var.set(tenant_info[2])  # tenant_name
-        #         self.contactnum_var.set(tenant_info[7])  # contact_number
-        #         self.email_var.set(tenant_info[6])  # email
-        #         self.unit_number_var.set(tenant_info[3])  # unit_number
-        #         self.sex_var.set(tenant_info[4])  # sex
-        #         self.birthdate_var.set(tenant_info[5])  # birthdate
-        #         self.move_in_var.set(tenant_info[6])  # move_in_date
-        #         self.lease_start_var.set(tenant_info[7])  # lease_start_date
-        #         self.lease_end_var.set(tenant_info[8])  # lease_end_date
-        #         self.last_payment_var.set(tenant_info[9])  # last_payment_date
-        #         self.emergency_contact_name_var.set(tenant_info[10])  # Emergency_contact_name
-        #         self.emergency_contact_number_var.set(tenant_info[11])  # Emergency_contact_number
-        #         self.relationship_var.set(tenant_info[12])  # Emergency_contact_relationship
-        #
-                # # Disable entry fields after populating them
-                # self.entry_tenant_name.configure(state="disabled")
-                # self.entry_contactnum.configure(state="disabled")
-                # self.entry_email.configure(state="disabled")
-                # self.entry_unit_number.configure(state="disabled")
-                # self.entry_sex.configure(state="disabled")
-                # self.entry_birthdate.configure(state="disabled")
-                # self.entry_move_in.configure(state="disabled")
-                # self.entry_lease_start.configure(state="disabled")
-                # self.entry_lease_end.configure(state="disabled")
-                # self.entry_last_payment.configure(state="disabled")
-                # self.entry_emergency_contact_number.configure(state="disabled")
-                # self.entry_emergency_contact_name.configure(state="disabled")
-                # self.entry_relationship.configure(state="disabled")
-        #
-        #     else:
-        #         CTkMessagebox(title="Error", message=f"Tenant information not found for ID: {self.tenant_id}")
-        #
-        # except Exception as e:
-        #     CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
-        #
-        # finally:
-        #     conn.close()
+    def disable_fields(self):
+        # Disable entry fields after populating them
+        self.entry_tenant_name.configure(state="disabled")
+        self.entry_contactnum.configure(state="disabled")
+        self.entry_email.configure(state="disabled")
+        self.entry_unit_number.configure(state="disabled")
+        self.entry_sex.configure(state="disabled")
+        self.entry_birthdate.configure(state="disabled")
+        self.entry_move_in.configure(state="disabled")
+        self.entry_lease_start.configure(state="disabled")
+        self.entry_lease_end.configure(state="disabled")
+        self.entry_last_payment.configure(state="disabled")
+        self.entry_emergency_contact_number.configure(state="disabled")
+        self.entry_emergency_contact_name.configure(state="disabled")
+        self.entry_relationship.configure(state="disabled")
 
 
     def edit_tenant_info(self):
