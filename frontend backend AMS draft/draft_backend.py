@@ -668,22 +668,46 @@ def fetch_lease_expiration_alerts(conn):
     try:
         cursor = conn.cursor()
         cursor.execute('''SELECT
-        AB.building_name,
-        AU.unit_number,
-        T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
-        T.contact_number,
-        T.move_in_date,
-        T.lease_start_date,
-        T.lease_end_date
-    FROM Tenant AS T
-    INNER JOIN Apartment_Unit AS AU
-        ON T.tenant_id = AU.unit_id
-    INNER JOIN Apartment_Building AS AB
-        ON AU.building_id = AB.building_id
-    LEFT JOIN Payment AS P
-        ON T.tenant_id = P.tenant_id
-        WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
-    ORDER BY lease_end_date ASC;''')
+    AB.building_name,
+    AU.unit_number,
+    T.firstName || ' ' || T.lastName AS tenant_name,
+    T.contact_number,
+    T.move_in_date,
+    T.lease_start_date,
+    T.lease_end_date
+FROM Tenant AS T
+INNER JOIN Apartment_Unit AS AU
+    ON T.Tenant_id = AU.unit_id
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id
+WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
+ORDER BY T.lease_end_date ASC;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
+
+
+def fetch_maintenance_requests(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+    AB.building_name,
+    AU.unit_number,
+    CASE
+        WHEN AU.availability_status = 1 THEN 'Available'
+        WHEN AU.availability_status = 2 THEN 'Occupied'
+        WHEN AU.availability_status = 3 THEN 'Under Maintenance'
+    END AS availability_status,
+    COALESCE(T.firstName || ' ' || T.middleName || ' ' || T.lastName, 'No Tenant') AS tenant_name,
+    T.contact_number
+FROM Apartment_Unit AS AU
+LEFT JOIN Tenant AS T
+    ON AU.unit_id = T.tenant_id
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id
+WHERE AU.maintenance_request = 1;''')
         rows = cursor.fetchall()
         return rows
     except Exception as e:

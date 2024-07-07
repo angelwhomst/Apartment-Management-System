@@ -3,11 +3,13 @@ from tkinter import ttk
 from tkinter import Scrollbar
 from PIL import Image
 import customtkinter as ctk
+import draft_backend
 
 class LeaseExpirationAlertComponent:
     def __init__(self, parent):
         self.parent = parent
         self.create_widgets()
+        self.populate_treeview()
 
     def create_widgets(self):
         # Create TopLevel window
@@ -24,16 +26,16 @@ class LeaseExpirationAlertComponent:
 
         # Create Frame to hold Treeview and Scrollbar
         self.frame = tk.Frame(self.top_level)
-        self.frame.place(relx=0.015, rely=0.20  , relwidth=0.99, relheight=0.8)  # Adjust placement and size
+        self.frame.place(relx=0.015, rely=0.20  , relwidth=0.99, relheight=0.8)
 
         # Create Treeview
-        columns = ("Building Name", "Unit Number", "Name", "Contact Number",)
+        columns = ("Building Name", "Unit Number", "Status", "Tenant Name", "Contact Number",)
         self.tree = ttk.Treeview(self.frame, columns=columns, show='headings')
 
         # Define headings with adjusted styles
         for col in columns:
             self.tree.heading(col, text=col, anchor='w')
-            self.tree.column(col, anchor='w', width=120)  # Adjust column widths as needed
+            self.tree.column(col, anchor='w', width=120)
 
         # Style Treeview
         style = ttk.Style()
@@ -54,33 +56,14 @@ class LeaseExpirationAlertComponent:
         # Place Treeview inside the Frame
         self.tree.pack(padx=20, pady=20, fill=tk.BOTH, expand=True)
 
-        # Example data (adjust as needed)
-        data = [
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-            ("Building A", "101", "John Doe", "1234567890", "2021-01-23", "2023-01-01"),
-            ("Building B", "202", "Jane Smith", "0987654321", "2021-01-17", "2023-02-15"),
-
-            # Add more data if needed
-        ]
-
-        # Insert example data into Treeview
-        for item in data:
-            self.tree.insert('', 'end', values=item)
+    def populate_treeview(self):
+        conn = draft_backend.get_db_connection()
+        if conn:
+            maintenance_requests = draft_backend.fetch_maintenance_requests(conn)
+            conn.close()
+            # Insert data into Treeview
+            for row in maintenance_requests:
+                self.tree.insert("", "end", values=row)
 
 # Entry point for running the LeaseExpirationAlertComponent directly
 if __name__ == "__main__":
