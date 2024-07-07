@@ -460,6 +460,7 @@ def fetch_tenants_by_name(conn, search_name):
         print(f"Error executing search query: {str(e)}")
         return None
 
+
 # ================ add_tenant PAGE FUNCTIONS =======================
 
 # def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
@@ -594,6 +595,7 @@ def fetch_latest_payment(conn, tenant_id):
     payment_info = cursor.fetchone()
     return payment_info
 
+
 # ================ expenses PAGE FUNCTIONS =======================
 
 def fetch_expense_treeview(conn):
@@ -617,9 +619,48 @@ FROM Expenses;''')
         print({e})
         return []
 
-# ================ recent_tenants PAGE FUNCTIONS =======================
 
-# def fetch_recent_tenants(conn):
-#     try:
-#         cursor = conn.cursor()
-#         cursor.execute('''''')
+
+# ================ recent_tenants PAGE FUNCTIONS =======================
+def fetch_recent_tenants(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+        AB.building_name,
+        AU.unit_number,
+        T.firstName || ' ' || T.lastName AS tenant_name,
+        T.contact_number AS contact_number,
+        T.move_in_date
+    FROM Tenant AS T
+    INNER JOIN Apartment_Unit AS AU
+        ON T.tenant_id = AU.unit_id
+    INNER JOIN Apartment_Building AS AB
+        ON AU.building_id = AB.building_id
+    LEFT JOIN Payment AS P
+        ON T.tenant_id = P.tenant_id
+        WHERE move_in_date >= DATE('now', '-30 days')
+ORDER BY move_in_date DESC;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
+
+
+# ================ dashboard PAGE FUNCTIONS =======================
+def total_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit;')
+    return cursor.fetchone()
+
+
+def occupied_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT COUNT(CASE availability_status
+                 WHEN 1 THEN 'Available'
+                 WHEN 2 THEN 'Occupied'
+                 WHEN 3 THEN 'Under Maintenance'
+             END) AS 'Available Units'
+FROM Apartment_Unit
+WHERE availability_status = 2;''')
+    return cursor.fetchone()
