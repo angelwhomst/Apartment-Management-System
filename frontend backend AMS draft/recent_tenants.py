@@ -5,6 +5,7 @@ from PIL import Image
 import customtkinter as ctk
 import draft_backend
 
+
 class RecentTenantComponent:
     def __init__(self, parent):
         self.parent = parent
@@ -26,7 +27,7 @@ class RecentTenantComponent:
 
         # Create Frame to hold Treeview and Scrollbar
         self.frame = tk.Frame(self.top_level)
-        self.frame.place(relx=0.015, rely=0.20  , relwidth=0.99, relheight=0.8)  # Adjust placement and size
+        self.frame.place(relx=0.015, rely=0.20, relwidth=0.99, relheight=0.8)  # Adjust placement and size
 
         # Create Treeview
         columns = ("Building Name", "Unit Number", "Name", "Contact Number", "Move in Date")
@@ -64,6 +65,7 @@ class RecentTenantComponent:
             # Insert data into Treeview
             for row in recent_tenants:
                 self.tree.insert("", "end", values=row)
+
 
 # FOR TESTING Entry point for running the LeaseExpirationAlertComponent directly
 if __name__ == "__main__":
