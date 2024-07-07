@@ -90,6 +90,7 @@ def create_tables(conn):
     tenant_dob                     DATE,
     sex                            INTEGER,
     income                         DOUBLE,
+    is_deleted      INTEGER      DEFAULT (0)
     FOREIGN KEY (
         admin_id
     )
@@ -418,6 +419,7 @@ def fetch_tenant_treeview(conn):
     LEFT JOIN Payment AS P
         ON T.tenant_id = P.tenant_id
         AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date -- checks if the tenant paid between the start and end of lease
+        WHERE T.is_deleted = 0
     ORDER BY P.payment_date DESC;
 ''')
         rows = cursor.fetchall()
@@ -715,3 +717,23 @@ WHERE AU.maintenance_request = 1;''')
         return []
 
 
+# ================ See More total_units FUNCTIONS =======================
+
+def count_available_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 1')
+    return cursor.fetchone()[0]
+
+
+def count_occupied_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 2')
+    return cursor.fetchone()[0]
+
+
+def count_under_maintenance_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 3')
+    return cursor.fetchone()[0]
+
+# ================ See More total_units FUNCTIONS =======================
