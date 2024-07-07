@@ -736,4 +736,21 @@ def count_under_maintenance_units(conn):
     cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 3')
     return cursor.fetchone()[0]
 
-# ================ See More total_units FUNCTIONS =======================
+
+# ================ See More rental_rates FUNCTIONS =======================
+def average_rental_rate(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT AVG (rental_rate) avg_rental_rate FROM Apartment_Unit')
+    return cursor.fetchone()[0]
+
+
+def maximum_rental_rate(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT MAX (rental_rate) max_rental_rate FROM Apartment_Unit')
+    return cursor.fetchone()[0]
+
+
+def minimum_rental_rate(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT MIN (rental_rate) min_rental_rate FROM Apartment_Unit')
+    return cursor.fetchone()[0]
