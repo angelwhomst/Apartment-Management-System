@@ -620,8 +620,25 @@ FROM Expenses;''')
         return []
 
 
+# ================ dashboard PAGE FUNCTIONS =======================
+def total_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit;')
+    return cursor.fetchone()
 
-# ================ recent_tenants PAGE FUNCTIONS =======================
+
+def occupied_units(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT COUNT(CASE availability_status
+                 WHEN 1 THEN 'Available'
+                 WHEN 2 THEN 'Occupied'
+                 WHEN 3 THEN 'Under Maintenance'
+             END) AS 'Available Units'
+FROM Apartment_Unit
+WHERE availability_status = 2;''')
+    return cursor.fetchone()
+
+
 def fetch_recent_tenants(conn):
     try:
         cursor = conn.cursor()
@@ -646,21 +663,3 @@ ORDER BY move_in_date DESC;''')
         print({e})
         return []
 
-
-# ================ dashboard PAGE FUNCTIONS =======================
-def total_units(conn):
-    cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit;')
-    return cursor.fetchone()
-
-
-def occupied_units(conn):
-    cursor = conn.cursor()
-    cursor.execute('''SELECT COUNT(CASE availability_status
-                 WHEN 1 THEN 'Available'
-                 WHEN 2 THEN 'Occupied'
-                 WHEN 3 THEN 'Under Maintenance'
-             END) AS 'Available Units'
-FROM Apartment_Unit
-WHERE availability_status = 2;''')
-    return cursor.fetchone()
