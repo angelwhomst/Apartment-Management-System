@@ -65,7 +65,7 @@ class ExpenseFrame(BaseFrame):
 
     def add_treeview(self):
         # Create Treeview
-        columns = ("Building Name", "Unit Number", "Name", "Contact Number", "Status", "Start Date")
+        columns = ("Expense Date", "Amount", "Expense Type", "Description")
         self.tree = ttk.Treeview(self, columns=("hidden_id", *columns), show='headings')
 
         # Hide the ID column

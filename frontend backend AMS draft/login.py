@@ -1,4 +1,5 @@
 import PIL
+from PIL import Image
 import customtkinter
 from customtkinter import *
 from CTkMessagebox import CTkMessagebox
@@ -107,7 +108,3 @@ class LoginFrame(CTkFrame):
     def dashboard(self):
         from dashboard import DashboardFrame
         self.controller.show_frame(DashboardFrame)
-
-    #def test_frame(self):
-        #from test_frame import testFrame
-       #self.controller.show_frame(testFrame)
