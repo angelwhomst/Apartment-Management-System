@@ -34,7 +34,7 @@ class ApartmentManagementApp(CTk):
 
         self.frames = {}
         self.create_frames()
-        self.show_frame(DashboardFrame)
+        self.show_frame(LoginFrame)
 
     def create_frames(self):
         for F in (

@@ -5,7 +5,8 @@ from PIL import Image
 import customtkinter as ctk
 import draft_backend
 
-class LeaseExpirationAlertComponent:
+
+class MaintenanceRequestComponent:
     def __init__(self, parent):
         self.parent = parent
         self.create_widgets()
@@ -26,7 +27,7 @@ class LeaseExpirationAlertComponent:
 
         # Create Frame to hold Treeview and Scrollbar
         self.frame = tk.Frame(self.top_level)
-        self.frame.place(relx=0.015, rely=0.20  , relwidth=0.99, relheight=0.8)
+        self.frame.place(relx=0.015, rely=0.20, relwidth=0.99, relheight=0.8)
 
         # Create Treeview
         columns = ("Building Name", "Unit Number", "Status", "Tenant Name", "Contact Number",)
@@ -65,8 +66,9 @@ class LeaseExpirationAlertComponent:
             for row in maintenance_requests:
                 self.tree.insert("", "end", values=row)
 
-# Entry point for running the LeaseExpirationAlertComponent directly
+
+# Entry point for running the MaintenanceRequestComponent directly
 if __name__ == "__main__":
     root = tk.Tk()
-    admin_tool = LeaseExpirationAlertComponent(root)
+    admin_tool = MaintenanceRequestComponent(root)
     root.mainloop()
