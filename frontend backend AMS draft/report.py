@@ -1,4 +1,5 @@
 import PIL
+from PIL import Image
 import customtkinter
 from base import BaseFrame
 from login import LoginFrame
