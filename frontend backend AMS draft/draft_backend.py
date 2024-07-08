@@ -742,21 +742,6 @@ LEFT JOIN Tenant AS T
     ON AU.unit_id = T.tenant_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
-WHERE AU.maintenance_request = 1;SELECT
-    AB.building_name,
-    AU.unit_number,
-    CASE
-        WHEN AU.availability_status = 1 THEN 'Available'
-        WHEN AU.availability_status = 2 THEN 'Occupied'
-        WHEN AU.availability_status = 3 THEN 'Under Maintenance'
-    END AS availability_status,
-    COALESCE(T.firstName || ' ' || T.middleName || ' ' || T.lastName, 'No Tenant') AS tenant_name,
-    T.contact_number
-FROM Apartment_Unit AS AU
-LEFT JOIN Tenant AS T
-    ON AU.unit_id = T.tenant_id
-INNER JOIN Apartment_Building AS AB
-    ON AU.building_id = AB.building_id
 WHERE AU.maintenance_request = 1;''')
         rows = cursor.fetchall()
         return rows
