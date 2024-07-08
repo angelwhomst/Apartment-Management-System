@@ -49,15 +49,15 @@ class MonthlyEarningsComponent(ctk.CTkFrame):
         try:
             # Fetch monthly earnings
             monthly_earnings = draft_backend.monthly_earnings(conn)
-            self.label_earnings_var.set(f"₱{monthly_earnings:.2f}")
+            self.label_earnings_var.set(f"₱{monthly_earnings:,.2f}")
 
             # Fetch month's rent collection
             monthly_rate = draft_backend.rent_collection(conn)
-            self.label_collection_var.set(f"₱{monthly_rate :.2f}")
+            self.label_collection_var.set(f"₱{monthly_rate :,.2f}")
 
             # Fetch monthly expense
             monthly_expense = draft_backend.monthly_expense(conn)
-            self.label_expense_var.set(f"₱{monthly_expense :.2f}")
+            self.label_expense_var.set(f"₱{monthly_expense :,.2f}")
 
         except Exception as e:
             print(f"Error fetching rental rates: {e}")

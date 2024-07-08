@@ -42,18 +42,18 @@ class MonthlyRatesComponent(ctk.CTkFrame):
         try:
             # Fetch average rental rate
             average_rate = draft_backend.average_rental_rate(conn)
-            self.label_average_var.set(f"₱{average_rate:.2f}")
+            self.label_average_var.set(f"₱{average_rate:,.2f}")
 
             # Fetch minimum rental rate
             minimum_rate = draft_backend.minimum_rental_rate(conn)
-            self.label_minimum_var.set(f"₱{(minimum_rate):.2f}")
+            self.label_minimum_var.set(f"₱{minimum_rate :,.2f}")
 
             # Fetch maximum rental rate
             maximum_rate = draft_backend.maximum_rental_rate(conn)
-            self.label_maximum_var.set(f"₱{(maximum_rate):.2f}")
+            self.label_maximum_var.set(f"₱{maximum_rate :,.2f}")
 
         except Exception as e:
-            print(f"Error fetching rental rates: {e}")
+            print(e)
         finally:
             conn.close()
 

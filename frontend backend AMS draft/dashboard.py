@@ -1,7 +1,6 @@
-import tkinter as tk
-from tkinter import ttk
 from PIL import Image
 import customtkinter as ctk
+import draft_backend
 
 from base import BaseFrame
 from rental_rates import MonthlyRatesComponent
@@ -11,10 +10,12 @@ from recent_tenants import RecentTenantComponent
 from monthly_earnings import MonthlyEarningsComponent
 from maintenance_request import MaintenanceRequestComponent
 
+
 class DashboardFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.create_widgets()
+        self.update_labels()
 
     def create_widgets(self):
         # Add background image and other dashboard setup
@@ -58,17 +59,23 @@ class DashboardFrame(BaseFrame):
         next_button_icon = ctk.CTkImage(next_button_icon_image, size=(50, 50))
 
         # See more buttons
-        button1 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_total_units, image=next_button_icon,
+        button1 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_total_units,
+                                image=next_button_icon,
                                 compound="right")
-        button2 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_monthly_rates, image=next_button_icon,
+        button2 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_monthly_rates,
+                                image=next_button_icon,
                                 compound="right")
-        button3 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_lease_alerts, image=next_button_icon,
+        button3 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_lease_alerts,
+                                image=next_button_icon,
                                 compound="right")
-        button4 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_recent_tenants, image=next_button_icon,
+        button4 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_recent_tenants,
+                                image=next_button_icon,
                                 compound="right")
-        button5 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_monthly_earnings, image=next_button_icon,
+        button5 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_monthly_earnings,
+                                image=next_button_icon,
                                 compound="right")
-        button6 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_maintenance_requests, image=next_button_icon,
+        button6 = ctk.CTkButton(self, text="See more", **button_style, command=self.show_maintenance_requests,
+                                image=next_button_icon,
                                 compound="right")
         # Define button positions
         button1.place(x=366, y=436)
@@ -79,6 +86,9 @@ class DashboardFrame(BaseFrame):
         button6.place(x=1124, y=681)
 
     def add_labels_with_placeholders(self):
+        # Dictionary to store StringVar instances
+        self.label_vars = {}
+
         labels_info = [
             ("label_total_units", 0.2705, 0.44),
             ("label_rental_rates", 0.5165, 0.44),
@@ -91,7 +101,7 @@ class DashboardFrame(BaseFrame):
         for label_name, relx, rely in labels_info:
             var = ctk.StringVar()
             var.set("#")
-            setattr(self, label_name, var)
+            self.label_vars[label_name] = var
 
             label_frame = ctk.CTkFrame(self, fg_color="#E6E1DD", width=100, height=100)
             label_frame.place(relx=relx, rely=rely, anchor="center")
@@ -99,6 +109,29 @@ class DashboardFrame(BaseFrame):
             label = ctk.CTkLabel(label_frame, textvariable=var, fg_color="#E6E1DD", text_color="#3D291F",
                                  width=100, height=100, font=("Century Gothic", 50, "bold"))
             label.place(relx=0.5, rely=0.5, anchor="center")
+
+    # method to update labels
+    def update_labels(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+        total_units = draft_backend.total_units(conn)
+        self.label_vars['label_total_units'].set(f'₱{total_units:,.2f}')
+
+        monthly_rate = draft_backend.average_rental_rate(conn)
+        self.label_vars['label_rental_rates'].set(f'₱{monthly_rate:,.2f}')
+
+        lease_expirations_alerts = draft_backend.count_lease_expiration_alerts(conn)
+        self.label_vars['label_expiration_Alerts'].set(f'₱{lease_expirations_alerts:,.2f}')
+
+        recent_tenants = draft_backend.count_recent_tenants(conn)
+        self.label_vars['label_recent_tenants'].set(f'₱{recent_tenants:,.2f}')
+
+        monthly_earnings = draft_backend.monthly_earnings(conn)
+        self.label_vars['label_monthly_earnings'].set(f'₱{monthly_earnings:,.2f}')
+
+        maintenance_requests = draft_backend.count_maintenance_requests(conn)
+        self.label_vars['label_maintenance_requests'].set(f'₱{maintenance_requests:,.2f}')
 
     def add_admin_tool_button(self):
         admin_icon_image = Image.open("images/toolIcon.png")
@@ -191,4 +224,3 @@ class DashboardFrame(BaseFrame):
 
         maintenance_request_component = MaintenanceRequestComponent(top_level)
         maintenance_request_component.pack(fill="both", expand=True)
-

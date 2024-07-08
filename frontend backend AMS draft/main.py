@@ -13,7 +13,6 @@ from expenses import ExpenseFrame
 import draft_backend
 
 
-
 def initialize_database():
     conn = draft_backend.get_db_connection()
     with conn:
@@ -34,7 +33,7 @@ class ApartmentManagementApp(CTk):
 
         self.frames = {}
         self.create_frames()
-        self.show_frame(LoginFrame)
+        self.show_frame(DashboardFrame)
 
     def create_frames(self):
         for F in (

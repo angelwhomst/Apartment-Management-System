@@ -208,7 +208,6 @@ def check_apartment_units_exist(conn):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM Apartment_Unit")
     count = cursor.fetchone()[0]
-    count = cursor.fetchone()[0]
     return count > 0
 
 
@@ -515,6 +514,7 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
         conn.rollback()
         return None  # Return None on error
 
+
 def fetch_unit_numbers(conn):  # function to populate combobox
     cursor = conn.cursor()
     cursor.execute('SELECT unit_number FROM Apartment_Unit')
@@ -596,99 +596,48 @@ FROM Expenses;''')
 def total_units(conn):
     cursor = conn.cursor()
     cursor.execute('SELECT COUNT(*) FROM Apartment_Unit;')
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 
-def occupied_units(conn):
+def count_lease_expiration_alerts(conn):
     cursor = conn.cursor()
-    cursor.execute('''SELECT COUNT(CASE availability_status
-                 WHEN 1 THEN 'Available'
-                 WHEN 2 THEN 'Occupied'
-                 WHEN 3 THEN 'Under Maintenance'
-             END) AS 'Available Units'
-FROM Apartment_Unit
-WHERE availability_status = 2;''')
-    return cursor.fetchone()
-
-
-def fetch_recent_tenants(conn):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''SELECT
-        AB.building_name,
-        AU.unit_number,
-        T.firstName || ' ' || T.lastName AS tenant_name,
-        T.contact_number AS contact_number,
-        T.move_in_date
-    FROM Tenant AS T
-    INNER JOIN Apartment_Unit AS AU
-        ON T.tenant_id = AU.unit_id
-    INNER JOIN Apartment_Building AS AB
-        ON AU.building_id = AB.building_id
-    LEFT JOIN Payment AS P
-        ON T.tenant_id = P.tenant_id
-        WHERE T.move_in_date >= DATE('now', '-30 days') AND T.is_deleted = 0
-    ORDER BY move_in_date DESC;''')
-        rows = cursor.fetchall()
-        return rows
-    except Exception as e:
-        print({e})
-        return []
-
-
-def fetch_lease_expiration_alerts(conn):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''SELECT
-    AB.building_name,
-    AU.unit_number,
-    T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
-    T.contact_number,
-    T.move_in_date,
-    T.lease_start_date,
-    T.lease_end_date
+    cursor.execute('''SELECT COUNT(*)
 FROM Tenant AS T
 INNER JOIN Apartment_Unit AS AU
     ON T.Tenant_id = AU.unit_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
-WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
-ORDER BY T.lease_end_date ASC;''')
-        rows = cursor.fetchall()
-        return rows
-    except Exception as e:
-        print({e})
-        return []
+WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now');
+''')
+    return cursor.fetchone()[0]
 
 
-def fetch_maintenance_requests(conn):
-    try:
-        cursor = conn.cursor()
-        cursor.execute('''SELECT
-    AB.building_name,
-    AU.unit_number,
-    CASE
-        WHEN AU.availability_status = 1 THEN 'Available'
-        WHEN AU.availability_status = 2 THEN 'Occupied'
-        WHEN AU.availability_status = 3 THEN 'Under Maintenance'
-    END AS availability_status,
-    COALESCE(T.firstName || ' ' || T.middleName || ' ' || T.lastName, 'No Tenant') AS tenant_name,
-    T.contact_number
+def count_recent_tenants(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT COUNT(*)
+    FROM Tenant AS T
+    INNER JOIN Apartment_Unit AS AU
+        ON T.tenant_id = AU.unit_id
+    INNER JOIN Apartment_Building AS AB
+        ON AU.building_id = AB.building_id
+        WHERE T.move_in_date >= DATE('now', '-30 days') AND T.is_deleted = 0
+    ORDER BY move_in_date DESC;''')
+    return cursor.fetchone()[0]
+
+
+def count_maintenance_requests(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT COUNT(*)
 FROM Apartment_Unit AS AU
 LEFT JOIN Tenant AS T
     ON AU.unit_id = T.tenant_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
 WHERE AU.maintenance_request = 1;''')
-        rows = cursor.fetchall()
-        return rows
-    except Exception as e:
-        print({e})
-        return []
+    return cursor.fetchone()[0]
 
 
 # ================ See More total_units FUNCTIONS =======================
-
 def count_available_units(conn):
     cursor = conn.cursor()
     cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 1')
@@ -746,3 +695,95 @@ def monthly_earnings(conn):
                         -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
 ''')
     return cursor.fetchone()[0]
+
+
+# ================ See More lease_expiration_alerts FUNCTIONS =======================
+def fetch_lease_expiration_alerts(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+    AB.building_name,
+    AU.unit_number,
+    T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+    T.contact_number,
+    T.move_in_date,
+    T.lease_start_date,
+    T.lease_end_date
+FROM Tenant AS T
+INNER JOIN Apartment_Unit AS AU
+    ON T.Tenant_id = AU.unit_id
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id
+WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
+ORDER BY T.lease_end_date ASC;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
+
+
+# ================ See More maintenance_requests FUNCTIONS =======================
+def fetch_maintenance_requests(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+    AB.building_name,
+    AU.unit_number,
+    CASE
+        WHEN AU.availability_status = 1 THEN 'Available'
+        WHEN AU.availability_status = 2 THEN 'Occupied'
+        WHEN AU.availability_status = 3 THEN 'Under Maintenance'
+    END AS availability_status,
+    COALESCE(T.firstName || ' ' || T.middleName || ' ' || T.lastName, 'No Tenant') AS tenant_name,
+    T.contact_number
+FROM Apartment_Unit AS AU
+LEFT JOIN Tenant AS T
+    ON AU.unit_id = T.tenant_id
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id
+WHERE AU.maintenance_request = 1;SELECT
+    AB.building_name,
+    AU.unit_number,
+    CASE
+        WHEN AU.availability_status = 1 THEN 'Available'
+        WHEN AU.availability_status = 2 THEN 'Occupied'
+        WHEN AU.availability_status = 3 THEN 'Under Maintenance'
+    END AS availability_status,
+    COALESCE(T.firstName || ' ' || T.middleName || ' ' || T.lastName, 'No Tenant') AS tenant_name,
+    T.contact_number
+FROM Apartment_Unit AS AU
+LEFT JOIN Tenant AS T
+    ON AU.unit_id = T.tenant_id
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id
+WHERE AU.maintenance_request = 1;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
+
+
+# ================ See More recent_tenants FUNCTIONS =======================
+def fetch_recent_tenants(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+        AB.building_name,
+        AU.unit_number,
+        T.firstName || ' ' || T.lastName AS tenant_name,
+        T.contact_number AS contact_number,
+        T.move_in_date
+    FROM Tenant AS T
+    INNER JOIN Apartment_Unit AS AU
+        ON T.tenant_id = AU.unit_id
+    INNER JOIN Apartment_Building AS AB
+        ON AU.building_id = AB.building_id
+        WHERE T.move_in_date >= DATE('now', '-30 days') AND T.is_deleted = 0
+    ORDER BY move_in_date DESC;''')
+        rows = cursor.fetchall()
+        return rows
+    except Exception as e:
+        print({e})
+        return []
