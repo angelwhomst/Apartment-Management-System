@@ -9,8 +9,9 @@ from payment_management import PaymentManagementFrame
 from report import ReportFrame
 from building_information import BuildingInformationFrame
 from profile import ProfileFrame
-import draft_backend
 from expenses import ExpenseFrame
+import draft_backend
+
 
 
 def initialize_database():

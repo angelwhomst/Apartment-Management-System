@@ -324,8 +324,7 @@ def insert_unit(conn, building_id, unit_number, rental_rate, number_of_bedrooms,
                           num_bathrooms, unit_size_square_m, maintenance_request, availability_status)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);''',
                        (admin_id, building_id, unit_number, rental_rate, number_of_bedrooms, number_of_bathrooms,
-                        unit_size,
-                        maintenance_request, availability_status))
+                        unit_size, maintenance_request, availability_status))
         conn.commit()
         print("Unit information saved successfully.")
     except Exception as e:
