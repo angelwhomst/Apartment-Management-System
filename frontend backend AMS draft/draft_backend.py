@@ -208,6 +208,7 @@ def check_apartment_units_exist(conn):
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM Apartment_Unit")
     count = cursor.fetchone()[0]
+    count = cursor.fetchone()[0]
     return count > 0
 
 
@@ -387,9 +388,8 @@ def insert_expense(conn, expense_date, expense_amount, expense_type, description
         cursor.execute('''INSERT INTO Expenses(admin_id, expense_date, expense_amount, expense_type, description)
                         VALUES (?, ?, ?, ?, ?);''', (admin_id, expense_date, expense_amount, expense_type, description))
         conn.commit()
-        print("Expense saved successfully.")
     except Exception as e:
-        print(f"Error saving unit information: {str(e)}")
+        print(e)
         conn.rollback()
 
 
@@ -642,7 +642,7 @@ def fetch_lease_expiration_alerts(conn):
         cursor.execute('''SELECT
     AB.building_name,
     AU.unit_number,
-    T.firstName || ' ' || T.lastName AS tenant_name,
+    T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
     T.contact_number,
     T.move_in_date,
     T.lease_start_date,

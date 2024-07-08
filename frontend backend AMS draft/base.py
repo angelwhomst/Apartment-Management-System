@@ -1,5 +1,7 @@
-from customtkinter import CTkButton, CTkFrame, CTkLabel, CTkImage
+from customtkinter import *
 import PIL
+from PIL import Image
+
 
 class BaseFrame(CTkFrame):
     def __init__(self, parent, controller):
@@ -49,6 +51,7 @@ class BaseFrame(CTkFrame):
                 text=text,
                 corner_radius=0,
                 fg_color="#5c483f",
+                bg_color="#5c483f",
                 hover_color="#D6BC9D",
                 font=('Century Gothic', 20),
                 width=300,

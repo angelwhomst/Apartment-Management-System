@@ -4,6 +4,7 @@ from base import BaseFrame
 from login import LoginFrame
 import customtkinter as ctk
 from profile import ProfileFrame
+from PIL import Image
 
 
 class BuildingInformationFrame(BaseFrame):

@@ -6,27 +6,24 @@ import customtkinter as ctk
 import draft_backend
 
 
-class RecentTenantComponent:
+class RecentTenantComponent(ctk.CTkFrame):
     def __init__(self, parent):
+        super().__init__(parent)
         self.parent = parent
+        self.parent.geometry("900x600")
+        self.parent.resizable(False, False)
         self.create_widgets()
         self.populate_treeview()
 
     def create_widgets(self):
-        # Create TopLevel window
-        self.top_level = tk.Toplevel(self.parent)
-        self.top_level.title("Recent Tenants")
-        self.top_level.geometry("900x600")  # Set initial size of the window
-        self.top_level.resizable(False, False)  # Disable resizing
-
         # Add background image
         admin_bg_image = Image.open("images/bgRecentTenants.png")
         admin_bg = ctk.CTkImage(admin_bg_image, size=(900, 600))
-        admin_bg_lbl = ctk.CTkLabel(self.top_level, text="", image=admin_bg)
+        admin_bg_lbl = ctk.CTkLabel(self, text="", image=admin_bg)
         admin_bg_lbl.place(x=0, y=0)
 
         # Create Frame to hold Treeview and Scrollbar
-        self.frame = tk.Frame(self.top_level)
+        self.frame = tk.Frame(self)
         self.frame.place(relx=0.015, rely=0.20, relwidth=0.99, relheight=0.8)  # Adjust placement and size
 
         # Create Treeview
@@ -67,8 +64,9 @@ class RecentTenantComponent:
                 self.tree.insert("", "end", values=row)
 
 
-# FOR TESTING Entry point for running the LeaseExpirationAlertComponent directly
+# FOR TESTING Entry point for running the RecentTenantComponent directly
 if __name__ == "__main__":
-    root = tk.Tk()
+    root = ctk.CTk()
     admin_tool = RecentTenantComponent(root)
+    admin_tool.pack(fill="both", expand=True)
     root.mainloop()
