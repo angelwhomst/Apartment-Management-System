@@ -357,7 +357,7 @@ def fetch_building_id_by_name(conn, building_name):
         return None
 
 
-def fetch_new_unit_info(conn, unit_id):
+def fetch_unit_info(conn, unit_id):
     cursor = conn.cursor()
     cursor.execute('''
         SELECT unit_id, building_id, unit_number, num_bedrooms, num_bathrooms,

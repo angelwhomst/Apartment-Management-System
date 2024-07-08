@@ -3,7 +3,7 @@ import tkinter as tk
 from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import customtkinter as ctk
-from customtkinter import CTkEntry, CTkButton, CTkLabel
+from customtkinter import *
 import add_unit  # Import the AddUnitComponent class
 import draft_backend
 
@@ -96,7 +96,7 @@ class DisplayUnitInformation:
             return
 
         try:
-            unit_info = draft_backend.fetch_new_unit_info(conn, self.unit_id)
+            unit_info = draft_backend.fetch_unit_info(conn, self.unit_id)
             if unit_info:
                 building_id = unit_info[1]
                 building_info = draft_backend.fetch_new_building_info(conn, building_id)
