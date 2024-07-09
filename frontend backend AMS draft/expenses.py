@@ -99,7 +99,11 @@ class ExpenseFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Expense Date", "Expense Amount", "Expense Type", "Description")
-        self.tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=("hidden_id", *columns), show='headings')
+
+        # Hide the ID column
+        self.tree.column("hidden_id", width=0, stretch=False)
+        self.tree.heading("hidden_id", text="")
 
         # Define headings with adjusted styles
         for col in columns:
@@ -124,6 +128,13 @@ class ExpenseFrame(BaseFrame):
 
         # Place Treeview inside the container
         self.tree.place(x=1130, y=348, width=700, height=590)
+        # Start periodic refresh
+        self.start_refresh()
+
+    def start_refresh(self):
+        # Periodically refresh data
+        self.refresh_data()
+        self.after(5000, self.start_refresh)  # Refresh every 5 seconds
 
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
@@ -134,6 +145,36 @@ class ExpenseFrame(BaseFrame):
             # insert data into the treeview
             for row in expenses:
                 self.tree.insert("", 'end', values=row)
+
+    def refresh_data(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+
+        try:
+            # Fetch all expenses
+            expenses = draft_backend.fetch_expense_treeview(conn)
+
+            # Clear existing items from the Treeview
+            self.tree.delete(*self.tree.get_children())
+
+            # Iterate over fetched expenses and update or insert into Treeview
+            for expense in expenses:
+                # Extract relevant values
+                expense_date = expense[0]
+                expense_amount = expense[1]
+                expense_type = expense[2]
+                description = expense[3]
+
+                # Insert or update Treeview item
+                self.tree.insert("", "end", values=(expense_date, expense_amount, expense_type,
+                                                    description))
+
+        except Exception as e:
+            print(f"Error fetching data: {str(e)}")
+
+        finally:
+            conn.close()
 
     def perform_search(self):
         # Placeholder for search functionality
