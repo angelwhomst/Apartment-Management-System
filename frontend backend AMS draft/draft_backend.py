@@ -784,7 +784,7 @@ def fetch_lease_expiration_alerts(conn):
     T.contact_number,
     T.move_in_date,
     T.lease_start_date,
-    T.lease_end_date
+    T.lease_end_date 
 FROM Tenant AS T
 INNER JOIN Apartment_Unit AS AU
     ON T.Tenant_id = AU.unit_id
