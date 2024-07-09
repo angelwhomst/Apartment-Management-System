@@ -54,15 +54,6 @@ class ExpenseFrame(BaseFrame):
                                    command=lambda: self.controller.show_frame(LoginFrame))
         logout_btn.place(relx=0.920, rely=0.105)
 
-    def populate_treeview(self):
-        conn = draft_backend.get_db_connection()
-        if conn:
-            expenses = draft_backend.fetch_expense_treeview(conn)
-            conn.close()
-
-            # insert data into the treeview
-            for row in expenses:
-                self.tree.insert("", 'end', values=row)
 
         # Add To: DateEntry
         to_date_entry = DateEntry(self, font=('Century Gothic', 16), width=12)
@@ -109,12 +100,12 @@ class ExpenseFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Expense Date", "Expense Amount", "Expense Type", "Description")
-        tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=columns, show='headings')
 
         # Define headings with adjusted styles
         for col in columns:
-            tree.heading(col, text=col, anchor='w')
-            tree.column(col, anchor='w', width=100)  # Align data to the left
+            self.tree.heading(col, text=col, anchor='w')
+            self.tree.column(col, anchor='w', width=100)  # Align data to the left
 
         # Style Treeview
         style = ttk.Style(self)
@@ -126,11 +117,22 @@ class ExpenseFrame(BaseFrame):
                         font=('Century Gothic', 14, 'bold'))
 
         # Create Scrollbar
-        vsb = ttk.Scrollbar(self, orient=tk.VERTICAL, command=tree.yview)
+        vsb = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
         vsb.place(x=1830, y=348, height=590)
 
         # Configure Treeview to use Scrollbar
-        tree.configure(yscrollcommand=vsb.set)
+        self.tree.configure(yscrollcommand=vsb.set)
+
+    def populate_treeview(self):
+        conn = draft_backend.get_db_connection()
+        if conn:
+            expenses = draft_backend.fetch_expense_treeview(conn)
+            conn.close()
+
+            # insert data into the treeview
+            for row in expenses:
+                self.tree.insert("", 'end', values=row)
+
 
     def perform_search(self):
         # Placeholder for search functionality
