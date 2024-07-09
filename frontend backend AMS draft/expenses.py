@@ -54,7 +54,6 @@ class ExpenseFrame(BaseFrame):
                                    command=lambda: self.controller.show_frame(LoginFrame))
         logout_btn.place(relx=0.920, rely=0.105)
 
-
         # Add To: DateEntry
         to_date_entry = DateEntry(self, font=('Century Gothic', 16), width=12)
         to_date_entry.place(relx=0.710, rely=0.300)
@@ -132,7 +131,6 @@ class ExpenseFrame(BaseFrame):
             # insert data into the treeview
             for row in expenses:
                 self.tree.insert("", 'end', values=row)
-
 
     def perform_search(self):
         # Placeholder for search functionality
