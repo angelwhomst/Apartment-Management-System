@@ -2,10 +2,10 @@ import PIL
 import customtkinter as ctk
 import tkinter as tk
 import tkinter.ttk as ttk
-from PIL import Image
 from base import BaseFrame
 from login import LoginFrame
 from profile import ProfileFrame
+from PIL import Image
 from tkcalendar import DateEntry  # Import DateEntry from tkcalendar
 import draft_backend
 
@@ -62,22 +62,22 @@ class ExpenseFrame(BaseFrame):
         from_date_entry = DateEntry(self, font=('Century Gothic', 16), width=12)
         from_date_entry.place(relx=0.610, rely=0.300)
 
-        # Add Search Entry with Placeholder Text
-        def on_entry_click(event):
-            if search_entry.get() == "Search Name...":
-                search_entry.delete(0, tk.END)
-                search_entry.config(fg="black")
+        # # Add Search Entry with Placeholder Text
+        # def on_entry_click(event):
+        #     if search_entry.get() == "Search Name...":
+        #         search_entry.delete(0, tk.END)
+        #         search_entry.config(fg="black")
+        #
+        # def on_focus_out(event):
+        #     if search_entry.get() == "":
+        #         search_entry.insert(0, "Search Name...")
+        #         search_entry.config(fg="#5c483f")
 
-        def on_focus_out(event):
-            if search_entry.get() == "":
-                search_entry.insert(0, "Search Name...")
-                search_entry.config(fg="#5c483f")
-
-        search_entry = tk.Entry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=30)
-        search_entry.insert(0, "Search Name...")
-        search_entry.bind('<FocusIn>', on_entry_click)
-        search_entry.bind('<FocusOut>', on_focus_out)
-        search_entry.place(relx=0.400, rely=0.300)
+        # search_entry = tk.Entry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=30)
+        # search_entry.insert(0, "Search Name...")
+        # search_entry.bind('<FocusIn>', on_entry_click)
+        # search_entry.bind('<FocusOut>', on_focus_out)
+        # search_entry.place(relx=0.400, rely=0.300)
 
         # Add Search Button
         search_button = ctk.CTkButton(master=self, text="Search", corner_radius=5, fg_color="#BDA588",
@@ -121,6 +121,9 @@ class ExpenseFrame(BaseFrame):
 
         # Configure Treeview to use Scrollbar
         self.tree.configure(yscrollcommand=vsb.set)
+
+        # Place Treeview inside the container
+        self.tree.place(x=1130, y=348, width=700, height=590)
 
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
