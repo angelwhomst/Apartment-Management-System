@@ -202,12 +202,12 @@ class DisplayTenantComponent:
         DisplayBuildingInformation(self.display_building_info_window)
 
 
-def main():
-    root = tk.Tk()
-    root.geometry("950x600")
-    app = DisplayTenantComponent(root)
-    root.mainloop()
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     root = tk.Tk()
+#     root.geometry("950x600")
+#     app = DisplayTenantComponent(root)
+#     root.mainloop()
+#
+#
+# if __name__ == "__main__":
+#     main()
