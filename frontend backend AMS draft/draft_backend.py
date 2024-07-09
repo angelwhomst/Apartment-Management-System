@@ -55,26 +55,31 @@ def create_tables(conn):
     num_bathrooms       INTEGER,
     unit_size_square_m  INTEGER,
     rental_rate         FLOAT,
-    availability_status INTEGER       NOT NULL, -- 1='available', 2='occupied' 3='under maintenance'
+    availability_status INTEGER       NOT NULL,
     maintenance_request INTEGER       DEFAULT (0),
     is_deleted          INTEGER       DEFAULT (0),
     FOREIGN KEY (
         building_id
     )
-    REFERENCES Apartment_building (building_id),
+    REFERENCES Apartment_Building (building_id),
     FOREIGN KEY (
         admin_id
     )
-    REFERENCES Admin (admin_id) 
+    REFERENCES Admin (admin_id),
+    UNIQUE (
+        building_id,
+        unit_number
+    )
 );
     ''')
     # creates table for tenant
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Tenant (
-    tenant_id                      INTEGER       PRIMARY KEY AUTOINCREMENT,
+    tenant_id                      INTEGER      PRIMARY KEY AUTOINCREMENT,
     admin_id                       INTEGER,
-    lastName                       VARCHAR (50)  NOT NULL,
-    firstName                      VARCHAR (50)  NOT NULL,
+    unit_id                        INTEGER      REFERENCES Apartment_Unit (unit_id),
+    lastName                       VARCHAR (50) NOT NULL,
+    firstName                      VARCHAR (50) NOT NULL,
     middleName                     VARCHAR (50),
     suffix                         VARCHAR (50),
     email                          VARCHAR (50),
@@ -89,12 +94,11 @@ def create_tables(conn):
     tenant_dob                     DATE,
     sex                            INTEGER,
     income                         DOUBLE,
-    is_deleted      INTEGER      DEFAULT (0),
+    is_deleted                     INTEGER      DEFAULT (0),
     FOREIGN KEY (
         admin_id
     )
-    REFERENCES Admin (admin_id) 
-);
+    REFERENCES Admin (admin_id) );
     ''')
     # creates table for payment
     cursor.execute('''
@@ -122,8 +126,9 @@ def create_tables(conn):
     admin_id       INTEGER,
     expense_date   DATE    NOT NULL,
     expense_amount DOUBLE  NOT NULL,
-    expense_type   INTEGER, -- 1='utilities', 2='maintenance and repairs', 3='advertising', 4='insurance', 5='administrative costs', 6='property management costs'
+    expense_type   INTEGER,
     description    TEXT,
+    is_deleted     INTEGER DEFAULT (0),
     FOREIGN KEY (
         admin_id
     )
@@ -405,26 +410,26 @@ def fetch_latest_expense_id(conn):
 def fetch_tenant_treeview(conn):
     try:
         cursor = conn.cursor()
-        cursor.execute(''' SELECT
-        AB.building_name,
-        AU.unit_number,
-        T.firstName || ' ' || T.lastName AS tenant_name,
-        T.contact_number AS contact_number,
-        CASE
-            WHEN P.payment_id IS NOT NULL THEN 'Paid'
-            ELSE 'Not Paid'
-        END AS payment_status,
-        T.lease_start_date
-    FROM Tenant AS T
-    INNER JOIN Apartment_Unit AS AU
-        ON T.tenant_id = AU.unit_id
-    INNER JOIN Apartment_Building AS AB
-        ON AU.building_id = AB.building_id
-    LEFT JOIN Payment AS P
-        ON T.tenant_id = P.tenant_id
-        AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date -- checks if the tenant paid between the start and end of lease
-        WHERE T.is_deleted = 0
-    ORDER BY P.payment_date DESC;
+        cursor.execute('''SELECT
+    AB.building_name,
+    AU.unit_number,
+    T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+    T.contact_number AS contact_number,
+    CASE
+        WHEN P.payment_id IS NOT NULL THEN 'Paid'
+        ELSE 'Not Paid'
+    END AS payment_status,
+    T.lease_start_date
+FROM Tenant AS T
+INNER JOIN Apartment_Unit AS AU
+    ON T.unit_id = AU.unit_id -- Correctly link tenants to apartment units
+INNER JOIN Apartment_Building AS AB
+    ON AU.building_id = AB.building_id -- Correctly link apartment units to buildings
+LEFT JOIN Payment AS P
+    ON T.tenant_id = P.tenant_id
+    AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date
+WHERE T.is_deleted = 0
+ORDER BY T.tenant_id, P.payment_date DESC; -- Ensure tenants are shown correctly and ordered by tenant_id;
 ''')
         rows = cursor.fetchall()
         return rows
@@ -495,12 +500,52 @@ def fetch_tenants_by_filters(conn, search_name, from_date, to_date):
     return cursor.fetchall()
 
 
-
 # ================ add_tenant PAGE FUNCTIONS =======================
+
+def fetch_building_name(conn):
+    cursor = conn.cursor()
+    cursor.execute('select distinct building_name from apartment_building;')
+    return cursor.fetchall()
+
+
+def fetch_unit_numbers_by_building(conn, building_name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT unit_number
+            FROM Apartment_Unit au
+            JOIN Apartment_Building ab ON au.building_id = ab.building_id
+            WHERE ab.building_name = ?;
+        ''', (building_name,))
+        result = cursor.fetchall()
+        return [row[0] for row in result]
+
+    except Exception as e:
+        print(f"Error fetching unit numbers: {str(e)}")
+        return []
+
+
+def get_unit_id(conn, unit_number, building_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT unit_id
+            FROM Apartment_Unit
+            WHERE unit_number = ? AND building_id = ?;
+        ''', (unit_number, building_id))
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return None
+    except Exception as e:
+        print(f"Error fetching unit_id: {str(e)}")
+        return None
+
 
 def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
-                  emergency_contact_relationship, tenant_dob, sex, income):
+                  emergency_contact_relationship, tenant_dob, sex, income, unit_id):
     admin_id = get_admin_id(conn)
     if not admin_id:
         return None  # Return None if admin_id is not available
@@ -510,6 +555,7 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
         cursor.execute('''
             INSERT INTO Tenant (
                 admin_id, 
+                unit_id,
                 lastName, 
                 firstName, 
                 middleName, 
@@ -526,8 +572,8 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
                 sex,
                 income
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        ''', (admin_id, lastName, firstName, middleName, suffix, email,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        ''', (admin_id, unit_id, lastName, firstName, middleName, suffix, email,
               contact_number, move_in_date,
               lease_start_date, lease_end_date, emergency_contact_name,
               emergency_contact_number,
