@@ -16,6 +16,7 @@ class DashboardFrame(BaseFrame):
         super().__init__(parent, controller)
         self.create_widgets()
         self.update_labels()
+        self.start_refresh()
 
     def create_widgets(self):
         # Add background image and other dashboard setup
@@ -90,12 +91,12 @@ class DashboardFrame(BaseFrame):
         self.label_vars = {}
 
         labels_info = [
-            ("label_total_units", 0.2705, 0.44),
-            ("label_rental_rates", 0.5165, 0.44),
-            ("label_expiration_Alerts", 0.7630, 0.44),
-            ("label_recent_tenants", 0.2705, 0.7455),
-            ("label_monthly_earnings", 0.5165, 0.7455),
-            ("label_maintenance_requests", 0.7630, 0.7455)
+            ("label_total_units", 0.2905, 0.44),
+            ("label_rental_rates", 0.5365, 0.44),
+            ("label_expiration_Alerts", 0.7830, 0.44),
+            ("label_recent_tenants", 0.2905, 0.7455),
+            ("label_monthly_earnings", 0.5365, 0.7455),
+            ("label_maintenance_requests", 0.7830, 0.7455)
         ]
 
         for label_name, relx, rely in labels_info:
@@ -103,12 +104,13 @@ class DashboardFrame(BaseFrame):
             var.set("#")
             self.label_vars[label_name] = var
 
-            label_frame = ctk.CTkFrame(self, fg_color="#E6E1DD", width=100, height=100)
+            label_frame = ctk.CTkFrame(self, fg_color="#E6E1DD", width=150, height=100)
             label_frame.place(relx=relx, rely=rely, anchor="center")
 
             label = ctk.CTkLabel(label_frame, textvariable=var, fg_color="#E6E1DD", text_color="#3D291F",
-                                 width=100, height=100, font=("Century Gothic", 50, "bold"))
+                                 width=300, height=100, font=("Century Gothic", 30, "bold"))
             label.place(relx=0.5, rely=0.5, anchor="center")
+
 
     # method to update labels
     def update_labels(self):
@@ -132,6 +134,42 @@ class DashboardFrame(BaseFrame):
 
         maintenance_requests = draft_backend.count_maintenance_requests(conn)
         self.label_vars['label_maintenance_requests'].set(f'{maintenance_requests}')
+
+    def start_refresh(self):
+        # Periodically refresh data
+        self.refresh_data()
+        self.after(5000, self.start_refresh)  # Refresh every 5 seconds
+
+    def refresh_data(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+
+        try:
+            # Update dashboard labels
+            total_units = draft_backend.total_units(conn)
+            self.label_vars['label_total_units'].set(f'{total_units}')
+
+            monthly_rate = draft_backend.average_rental_rate(conn)
+            self.label_vars['label_rental_rates'].set(f'₱{monthly_rate:,.2f}')
+
+            lease_expirations_alerts = draft_backend.count_lease_expiration_alerts(conn)
+            self.label_vars['label_expiration_Alerts'].set(f'{lease_expirations_alerts}')
+
+            recent_tenants = draft_backend.count_recent_tenants(conn)
+            self.label_vars['label_recent_tenants'].set(f'{recent_tenants}')
+
+            monthly_earnings = draft_backend.monthly_earnings(conn)
+            self.label_vars['label_monthly_earnings'].set(f'₱{monthly_earnings:,.2f}')
+
+            maintenance_requests = draft_backend.count_maintenance_requests(conn)
+            self.label_vars['label_maintenance_requests'].set(f'{maintenance_requests}')
+
+        except Exception as e:
+            print(f"Error refreshing data: {str(e)}")
+
+        finally:
+            conn.close()
 
     def add_admin_tool_button(self):
         admin_icon_image = Image.open("images/toolIcon.png")
