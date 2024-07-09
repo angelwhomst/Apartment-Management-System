@@ -135,9 +135,10 @@ class TenantInformationFrame(BaseFrame):
         self.start_refresh()
 
     def start_refresh(self):
-        # Periodically refresh data (every 5 seconds in this example)
-        self.refresh_data()
-        self.after(5000, self.start_refresh)  # Refresh every 5 seconds
+        # Periodically refresh data
+        if not hasattr(self, 'refreshing_search') or not self.refreshing_search:
+            self.refresh_data()
+            self.after(5000, self.start_refresh)  # Refresh every 5 seconds
 
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
@@ -181,6 +182,10 @@ class TenantInformationFrame(BaseFrame):
             conn.close()
 
     def perform_search(self):
+        # Disable auto-refresh during search
+        self.refreshing_search = True
+
+
         search_name = self.search_entry.get()
         from_date = self.from_date_entry.get_date()
         to_date = self.to_date_entry.get_date()
