@@ -833,12 +833,12 @@ def fetch_recent_tenants(conn):
         cursor.execute('''SELECT
         AB.building_name,
         AU.unit_number,
-        T.firstName || ' ' || T.lastName AS tenant_name,
+        T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
         T.contact_number AS contact_number,
         T.move_in_date
     FROM Tenant AS T
     INNER JOIN Apartment_Unit AS AU
-        ON T.tenant_id = AU.unit_id
+        ON T.unit_id = AU.unit_id
     INNER JOIN Apartment_Building AS AB
         ON AU.building_id = AB.building_id
         WHERE T.move_in_date >= DATE('now', '-30 days') AND T.is_deleted = 0
