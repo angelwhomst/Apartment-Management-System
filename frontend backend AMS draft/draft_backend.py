@@ -243,7 +243,7 @@ def insert_building(conn, building_name, country, province, city, street, lot_nu
                                                                  street, lot_number, zip_code, amenities))
         conn.commit()
     except Exception as e:
-        print(f"Error adding apartment unit: {str(e)}")
+        print(f"Error adding apartment building: {str(e)}")
         conn.rollback()
 
 
@@ -863,3 +863,51 @@ def fetch_payment_treeview(conn):
     return cursor.fetchall()
 
 
+def insert_payment(conn, amount, payment_date, payment_method, tenant_id, unit_id):
+    try:
+        cursor = conn.cursor()
+        # Perform the insert operation
+        cursor.execute('''INSERT INTO Payment (amount, payment_date, payment_method, tenant_id, unit_id) 
+                        VALUES (?, ?, ?, ?, ?)''',
+                       (amount, payment_date, payment_method, tenant_id, unit_id))
+        conn.commit()
+        return True
+    except Exception as e:
+        print(f"Error inserting payment: {str(e)}")
+        return False
+
+
+def fetch_tenant_id_by_name_and_unit_details(conn, first_name, last_name, unit_number, building_name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT T.tenant_id FROM Tenant T
+                JOIN Apartment_Unit AU ON T.unit_id = AU.unit_id 
+                JOIN Apartment_Building AB ON AU.building_id = AB.building_id 
+                WHERE T.firstName = ? AND T.lastName = ? 
+                AND AU.unit_number = ? AND AB.building_name = ?''',
+                       (first_name, last_name, unit_number, building_name))
+        tenant_id = cursor.fetchone()
+        if tenant_id:
+            tenant_id = tenant_id[0]
+        return tenant_id
+
+    except Exception as e:
+        print(f"Error fetching tenant ID: {str(e)}")
+        return None
+
+
+def fetch_unit_id_by_number_and_building(conn, unit_number, building_name):
+    try:
+        cursor = conn.cursor()
+        cursor.execute(
+            '''SELECT unit_id FROM Apartment_Unit AU
+            JOIN Apartment_Building AB ON AU.building_id = AB.building_id 
+            WHERE AU.unit_number = ? AND AB.building_name = ?''',
+            (unit_number, building_name))
+        unit_id = cursor.fetchone()
+        if unit_id:
+            unit_id = unit_id[0]
+        return unit_id
+    except Exception as e:
+        print(f"Error fetching unit ID: {str(e)}")
+        return None

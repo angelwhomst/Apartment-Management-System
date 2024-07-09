@@ -3,7 +3,6 @@ import customtkinter
 import customtkinter as ctk
 import tkinter as tk
 import tkinter.ttk as ttk
-
 from CTkMessagebox import CTkMessagebox
 from customtkinter import CTkComboBox
 from tkcalendar import DateEntry
@@ -13,20 +12,21 @@ from profile import ProfileFrame
 from PIL import Image
 import draft_backend
 
-
 # mapping from combobox values to database int values for payment_method
-payment_method = {
+payment_method_mapping = {
     'Cash': 1,
     'E-wallet': 2,
     'Bank Transfer': 3,
     'Credit Card': 4
 }
 
+
 class PaymentManagementFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.create_widgets()
         self.populate_treeview()
+        self.start_refresh()
 
     def create_widgets(self):
         # Add background image
@@ -47,22 +47,22 @@ class PaymentManagementFrame(BaseFrame):
         PaymentManagementLabel.place(relx=0.23, rely=0.18)
         # Combo box and entries
         self.entry_first_name = ctk.CTkEntry(self, width=200, height=30,
-                                                       font=('Century Gothic', 15), border_color="#937A69")
+                                             font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_first_name.place(relx=0.325, rely=0.465, anchor="center")
 
         self.entry_middle_name = ctk.CTkEntry(self, width=200, height=30,
-                                                 font=('Century Gothic', 15), border_color="#937A69")
+                                              font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_middle_name.place(relx=0.325, rely=0.545, anchor="center")
 
         self.entry_last_name = ctk.CTkEntry(self, width=200, height=30,
-                                              font=('Century Gothic', 15), border_color="#937A69")
+                                            font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_last_name.place(relx=0.325, rely=0.625, anchor="center")
 
         self.entry_bill = ctk.CTkEntry(self, width=200, height=30,
-                                            font=('Century Gothic', 15), border_color="#937A69")
+                                       font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_bill.place(relx=0.490, rely=0.545, anchor="center")
 
@@ -74,11 +74,11 @@ class PaymentManagementFrame(BaseFrame):
         conn.close()
 
         self.combo_box_building_name = CTkComboBox(self, values=building_names, width=240, height=25,
-                                               font=('Century Gothic', 12))
+                                                   font=('Century Gothic', 12))
         self.combo_box_building_name.place(relx=0.490, rely=0.625, anchor="center")
 
         self.combo_box_unit_number = ctk.CTkComboBox(self, values=[], width=200, height=30,
-                                            font=('Century Gothic', 15), border_color="#937A69")
+                                                     font=('Century Gothic', 15), border_color="#937A69")
 
         self.combo_box_unit_number.place(relx=0.490, rely=0.465, anchor="center")
 
@@ -86,18 +86,18 @@ class PaymentManagementFrame(BaseFrame):
         self.combo_box_building_name.configure(command=self.update_unit_numbers)
 
         self.payment_date = DateEntry(self, width=21, height=30,
-                                       font=('Century Gothic', 15), border_color="#937A69")
+                                      font=('Century Gothic', 15), border_color="#937A69")
 
         self.payment_date.place(relx=0.490, rely=0.775, anchor="center")
 
         payment_methods = ['Cash', 'E-wallet', 'Bank Transfer', 'Credit Card']
         self.combo_box_MOP = ctk.CTkComboBox(self, values=payment_methods, width=200, height=30,
-                                                     font=('Century Gothic', 15), border_color="#937A69")
+                                             font=('Century Gothic', 15), border_color="#937A69")
 
         self.combo_box_MOP.place(relx=0.325, rely=0.780, anchor="center")
 
         self.entry_amount = ctk.CTkEntry(self, width=200, height=30,
-                                       font=('Century Gothic', 15), border_color="#937A69")
+                                         font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_amount.place(relx=0.325, rely=0.860, anchor="center")
 
@@ -127,8 +127,8 @@ class PaymentManagementFrame(BaseFrame):
         delete_button.place(relx=0.825, rely=0.295)
 
         save_button = ctk.CTkButton(master=self, text="Save", corner_radius=5, fg_color="#BDA588",
-                                      hover_color="#D6BC9D", text_color="black", bg_color="#D8CCC4",
-                                      font=('Century Gothic', 16,), width=100, height=30)
+                                    hover_color="#D6BC9D", text_color="black", bg_color="#D8CCC4",
+                                    font=('Century Gothic', 16,), width=100, height=30, command=self.save_payment)
         save_button.place(relx=0.458, rely=0.860, anchor="center")
 
         # Add To: DateEntry
@@ -156,7 +156,6 @@ class PaymentManagementFrame(BaseFrame):
         self.search_entry.bind('<FocusOut>', on_focus_out)
         self.search_entry.place(relx=0.235, rely=0.300)
 
-
         # Ensure the sidebar is setup after the background images
         self.setup_sidebar()
 
@@ -182,7 +181,6 @@ class PaymentManagementFrame(BaseFrame):
 
         # Clear existing values and update with fetched unit numbers
         self.combo_box_unit_number.configure(values=unit_numbers)
-
 
     def add_treeview(self):
         # Create Treeview
@@ -259,12 +257,76 @@ class PaymentManagementFrame(BaseFrame):
         finally:
             conn.close()
 
-
     def save_payment(self):
 
         amount = self.entry_amount.get()
         date = self.payment_date.get_date()
         mode_of_payment = self.combo_box_MOP.get()
+        first_name = self.entry_first_name.get()
+        middle_name = self.entry_middle_name.get()
+        last_name = self.entry_last_name.get()
+        unit_number = self.combo_box_unit_number.get()
+        building_name = self.combo_box_building_name.get()
+
+        # map the selected mode of payment to its integer value
+        payment_method_int = payment_method_mapping.get(mode_of_payment)
+
+        # validate user inputs
+        if not amount and not date and not building_name and not unit_number:
+            CTkMessagebox(title="Error", message="All fields are required.")
+            return
+
+        if not amount.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on payment amount.")
+            return
+
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        tenant_id = draft_backend.fetch_tenant_id_by_name_and_unit_details(conn, first_name, last_name, unit_number,
+                                                                           building_name)
+        if tenant_id is None:
+            CTkMessagebox(title="Error",
+                          message=f"Tenant '{first_name} {last_name}' in unit '{unit_number}' of '{building_name}' "
+                                  f"not found.")
+            return
+
+        # Fetch unit_id based on unit number and building name
+        unit_id = draft_backend.fetch_unit_id_by_number_and_building(conn, unit_number, building_name)
+        if unit_id is None:
+            CTkMessagebox(title="Error", message=f"Unit '{unit_number}' in '{building_name}' not found.")
+            return
+
+        # Proceed to save data to the database
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        try:
+            success = draft_backend.insert_payment(conn, float(amount), date, payment_method_int, tenant_id, unit_id)
+            if success:
+                CTkMessagebox(title="Success", message="Payment saved successfully.")
+                # Clear input fields after successful save
+                self.entry_amount.delete(0, tk.END)
+                self.payment_date.set_date("")
+                self.combo_box_MOP.set("")
+                self.entry_first_name.delete(0, tk.END)
+                self.entry_middle_name.delete(0, tk.END)
+                self.entry_last_name.delete(0, tk.END)
+                self.combo_box_unit_number.set("")
+                self.combo_box_building_name.set("")
+
+                # Refresh the Treeview to display updated data
+                self.populate_treeview()
+            else:
+                CTkMessagebox(title="Error", message="Failed to save payment.")
+        except Exception as e:
+            print(f"Error saving payment: {str(e)}")
+        finally:
+            conn.close()
 
     def add_profile_button(self):
         profile_btn = ctk.CTkButton(master=self, text="Profile", corner_radius=0, fg_color="#CFB9A3",
