@@ -68,7 +68,7 @@ class AddTenantComponent:
         conn.close()
 
         self.entry_building_name = CTkComboBox(parent, values=building_names, width=240, height=25,
-                                                font=('Century Gothic', 12))
+                                               font=('Century Gothic', 12))
         self.entry_building_name.place(relx=0.310, rely=0.300, anchor="center")
 
         # # Bind event to update unit numbers when building is selected HINDI GUMAGANA SA CTK
@@ -76,7 +76,7 @@ class AddTenantComponent:
 
         # Fetch unit numbers from the database when building is selected
         self.entry_unit_number = CTkComboBox(parent, values=[], width=240, height=25,
-                                              font=('Century Gothic', 12))
+                                             font=('Century Gothic', 12))
         self.entry_unit_number.place(relx=0.310, rely=0.539, anchor="center")
 
         # Bind the command to update unit numbers based on building selection
@@ -138,7 +138,6 @@ class AddTenantComponent:
 
         # Place the buttons
         save_button.place(relx=0.85, rely=0.90, anchor='center')
-
 
     def update_unit_numbers(self, selected_building):
         conn = draft_backend.get_db_connection()

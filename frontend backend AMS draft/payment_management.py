@@ -3,6 +3,9 @@ import customtkinter
 import customtkinter as ctk
 import tkinter as tk
 import tkinter.ttk as ttk
+
+from CTkMessagebox import CTkMessagebox
+from customtkinter import CTkComboBox
 from tkcalendar import DateEntry
 from base import BaseFrame
 from login import LoginFrame
@@ -11,10 +14,19 @@ from PIL import Image
 import draft_backend
 
 
+# mapping from combobox values to database int values for payment_method
+payment_method = {
+    'Cash': 1,
+    'E-wallet': 2,
+    'Bank Transfer': 3,
+    'Credit Card': 4
+}
+
 class PaymentManagementFrame(BaseFrame):
     def __init__(self, parent, controller):
         super().__init__(parent, controller)
         self.create_widgets()
+        self.populate_treeview()
 
     def create_widgets(self):
         # Add background image
@@ -54,17 +66,32 @@ class PaymentManagementFrame(BaseFrame):
 
         self.entry_bill.place(relx=0.490, rely=0.545, anchor="center")
 
-        self.combo_box_unit_number = ctk.CTkComboBox(self, width=200, height=30,
+        # Fetch building names from the database
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+        building_names = draft_backend.fetch_building_names(conn)
+        conn.close()
+
+        self.combo_box_building_name = CTkComboBox(self, values=building_names, width=240, height=25,
+                                               font=('Century Gothic', 12))
+        self.combo_box_building_name.place(relx=0.490, rely=0.625, anchor="center")
+
+        self.combo_box_unit_number = ctk.CTkComboBox(self, values=[], width=200, height=30,
                                             font=('Century Gothic', 15), border_color="#937A69")
 
         self.combo_box_unit_number.place(relx=0.490, rely=0.465, anchor="center")
+
+        # Bind the command to update unit numbers based on building selection
+        self.combo_box_building_name.configure(command=self.update_unit_numbers)
 
         self.payment_date = DateEntry(self, width=21, height=30,
                                        font=('Century Gothic', 15), border_color="#937A69")
 
         self.payment_date.place(relx=0.490, rely=0.775, anchor="center")
 
-        self.combo_box_MOP = ctk.CTkComboBox(self, width=200, height=30,
+        payment_methods = ['Cash', 'E-wallet', 'Bank Transfer', 'Credit Card']
+        self.combo_box_MOP = ctk.CTkComboBox(self, values=payment_methods, width=200, height=30,
                                                      font=('Century Gothic', 15), border_color="#937A69")
 
         self.combo_box_MOP.place(relx=0.325, rely=0.780, anchor="center")
@@ -142,15 +169,30 @@ class PaymentManagementFrame(BaseFrame):
         # Add Treeview with Scrollbar
         self.add_treeview()
 
+    def update_unit_numbers(self, selected_building):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        unit_numbers = draft_backend.fetch_unit_numbers_by_building(conn, selected_building)
+        conn.close()
+
+        print(f"Fetched unit numbers: {unit_numbers}")  # Debug statement
+
+        # Clear existing values and update with fetched unit numbers
+        self.combo_box_unit_number.configure(values=unit_numbers)
+
+
     def add_treeview(self):
         # Create Treeview
-        columns = ("Building Number", "Unit Number", "Tenant Name", "Due Date", "Bill")
-        tree = ttk.Treeview(self, columns=columns, show='headings')
+        columns = ("Building Name", "Unit Number", "Tenant Name", "Due Date", "Bill")
+        self.tree = ttk.Treeview(self, columns=columns, show='headings')
 
         # Define headings with adjusted styles
         for col in columns:
-            tree.heading(col, text=col, anchor='w')
-            tree.column(col, anchor='w', width=100)  # Align data to the left
+            self.tree.heading(col, text=col, anchor='w')
+            self.tree.column(col, anchor='w', width=100)  # Align data to the left
 
         # Style Treeview
         style = ttk.Style(self)
@@ -162,29 +204,67 @@ class PaymentManagementFrame(BaseFrame):
                         font=('Century Gothic', 14, 'bold'))
 
         # Create Scrollbar
-        vsb = ttk.Scrollbar(self, orient=tk.VERTICAL, command=tree.yview)
+        vsb = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
         vsb.place(x=1830, y=348, height=590)
 
         # Configure Treeview to use Scrollbar
-        tree.configure(yscrollcommand=vsb.set)
+        self.tree.configure(yscrollcommand=vsb.set)
 
         # Place Treeview inside the container
-        tree.place(x=1130, y=348, width=700, height=590)
+        self.tree.place(x=1130, y=348, width=700, height=590)
 
-        # Example data (adjust as needed)
-        data = [
-            ("June/22/2004", "101", "Utilities", "SalamAaaaa-- --","6559"),
-            ("August/10/2004", "202", "Advertising", "tHankyouUU so MuuUU","1000"),
-            # Add more data if needed
-        ]
+    def populate_treeview(self):
+        conn = draft_backend.get_db_connection()
+        if conn:
+            payment = draft_backend.fetch_payment_treeview(conn)
+            conn.close()
 
-        # Insert example data multiple times for more rows
-        for _ in range(5):
-            data.extend(data)
+            # insert data into the treeview
+            for row in payment:
+                self.tree.insert("", 'end', values=row)
 
-        # Insert example data into Treeview
-        for item in data:
-            tree.insert('', 'end', values=item)
+    def start_refresh(self):
+        # Periodically refresh data
+        self.refresh_data()
+        self.after(5000, self.start_refresh)  # Refresh every 5 seconds
+
+    def refresh_data(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            return
+
+        try:
+            # Fetch all expenses
+            payments = draft_backend.fetch_payment_treeview(conn)
+
+            # Clear existing items from the Treeview
+            self.tree.delete(*self.tree.get_children())
+
+            # Iterate over fetched expenses and update or insert into Treeview
+            for payment in payments:
+                # Extract relevant values
+                building_name = payment[0]
+                unit_number = payment[1]
+                tenant_name = payment[2]
+                due_date = payment[3]
+                bill = payment[4]
+
+                # Insert or update Treeview item
+                self.tree.insert("", "end", values=(building_name, unit_number, tenant_name, due_date,
+                                                    bill))
+
+        except Exception as e:
+            print(f"Error fetching data: {str(e)}")
+
+        finally:
+            conn.close()
+
+
+    def save_payment(self):
+
+        amount = self.entry_amount.get()
+        date = self.payment_date.get_date()
+        mode_of_payment = self.combo_box_MOP.get()
 
     def add_profile_button(self):
         profile_btn = ctk.CTkButton(master=self, text="Profile", corner_radius=0, fg_color="#CFB9A3",

@@ -422,9 +422,9 @@ def fetch_tenant_treeview(conn):
     T.lease_start_date
 FROM Tenant AS T
 INNER JOIN Apartment_Unit AS AU
-    ON T.unit_id = AU.unit_id -- Correctly link tenants to apartment units
+    ON T.unit_id = AU.unit_id -- correctly link tenants to apartment units
 INNER JOIN Apartment_Building AS AB
-    ON AU.building_id = AB.building_id -- Correctly link apartment units to buildings
+    ON AU.building_id = AB.building_id -- correctly link apartment units to buildings
 LEFT JOIN Payment AS P
     ON T.tenant_id = P.tenant_id
     AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date
@@ -589,13 +589,6 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
         print(f"Error saving tenant information: {str(e)}")
         conn.rollback()
         return None  # Return None on error
-
-
-def fetch_unit_numbers(conn):  # function to populate combobox
-    cursor = conn.cursor()
-    cursor.execute('SELECT unit_number FROM Apartment_Unit')
-    unit_numbers = cursor.fetchall()
-    return [unit_number[0] for unit_number in unit_numbers]
 
 
 # ================ display_tenant_details PAGE FUNCTIONS =======================
@@ -766,8 +759,8 @@ def monthly_expense(conn):
 
 def monthly_earnings(conn):
     cursor = conn.cursor()
-    cursor.execute('''SELECT (SELECT COALESCE(SUM(expense_amount), 0) FROM Expenses) - (SELECT COALESCE(SUM(amount), 0) 
-                        FROM Payment) AS earnings;
+    cursor.execute('''SELECT (SELECT (SELECT COALESCE(SUM(amount), 0)FROM Payment) - COALESCE(SUM(expense_amount), 0) 
+                        FROM Expenses)  AS earnings;
                         -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
 ''')
     return cursor.fetchone()[0]
@@ -848,3 +841,25 @@ def fetch_recent_tenants(conn):
     except Exception as e:
         print({e})
         return []
+
+
+# ================ payment_management PAGE FUNCTIONS =======================
+def fetch_payment_treeview(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT AB.building_name,
+                    AU.unit_number,
+                    T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+                    T.lease_end_date,
+                    AU.rental_rate
+                    FROM Tenant AS T
+                INNER JOIN Apartment_Unit AS AU
+                    ON T.tenant_id = AU.unit_id
+                INNER JOIN Apartment_Building AS AB
+                    ON AU.building_id = AB.building_id
+                WHERE T.is_deleted = 0
+                AND AU.availability_status=2
+                ORDER BY T.lease_end_date ASC;
+                ''')
+    return cursor.fetchall()
+
+
