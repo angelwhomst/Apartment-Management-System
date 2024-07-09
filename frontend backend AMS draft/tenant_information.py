@@ -185,7 +185,6 @@ class TenantInformationFrame(BaseFrame):
         # Disable auto-refresh during search
         self.refreshing_search = True
 
-
         search_name = self.search_entry.get()
         from_date = self.from_date_entry.get_date()
         to_date = self.to_date_entry.get_date()
