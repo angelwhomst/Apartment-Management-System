@@ -82,6 +82,10 @@ class AddExpenseComponent:
         # map the selected expense type to its integer value
         expense_type_int = expense_type_mapping.get(expense_type)
 
+        if not expense_amount.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on expense amount.")
+            return
+
         # proceed to save data to the database
         conn = draft_backend.get_db_connection()
         if not conn:
@@ -163,11 +167,3 @@ class AddExpenseComponent:
         # Create an instance of AddUnitComponent and pass the new window as its parent
         AddUnitComponent(self.add_unit_window)
 
-# def main():
-#     root = tk.Tk()
-#     root.geometry("950x600")
-#     app = AddExpenseComponent(root)
-#     root.mainloop()
-#
-# if __name__ == "__main__":
-#     main()
