@@ -82,6 +82,7 @@ class AddExpenseComponent:
         # map the selected expense type to its integer value
         expense_type_int = expense_type_mapping.get(expense_type)
 
+        # validate user inputs
         if not expense_amount.isdigit():
             CTkMessagebox(title="Error", message="Please input only digits on expense amount.")
             return

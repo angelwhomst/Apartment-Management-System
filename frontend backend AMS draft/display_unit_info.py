@@ -113,15 +113,7 @@ class DisplayUnitInformation:
                     self.label_availability_status_var.set(unit_info[7])  # availability_status
                     self.label_maintenance_request_var.set(unit_info[8])  # maintenance_request
 
-                    # Disable entry fields after populating them
-                    self.entry_building_name.configure(state="disabled")
-                    self.entry_unit_number.configure(state="disabled")
-                    self.entry_number_of_bedrooms.configure(state="disabled")
-                    self.entry_number_of_bathrooms.configure(state="disabled")
-                    self.entry_unit_size.configure(state="disabled")
-                    self.entry_rental_rate.configure(state="disabled")
-                    self.entry_availability_status.configure(state="disabled")
-                    self.entry_maintenance_request.configure(state="disabled")
+                    self.disable_fields()
 
                 else:
                     # Handle case where building information is not found
@@ -136,6 +128,17 @@ class DisplayUnitInformation:
 
         finally:
             conn.close()
+
+    def disable_fields(self):
+        # Disable entry fields after populating them
+        self.entry_building_name.configure(state="disabled")
+        self.entry_unit_number.configure(state="disabled")
+        self.entry_number_of_bedrooms.configure(state="disabled")
+        self.entry_number_of_bathrooms.configure(state="disabled")
+        self.entry_unit_size.configure(state="disabled")
+        self.entry_rental_rate.configure(state="disabled")
+        self.entry_availability_status.configure(state="disabled")
+        self.entry_maintenance_request.configure(state="disabled")
 
     def edit_unit_info(self):
         # Close the Display Unit Info window

@@ -467,11 +467,40 @@ def fetch_tenants_by_name(conn, search_name):
         return None
 
 
+def fetch_tenants_by_filters(conn, search_name, from_date, to_date):
+    cursor = conn.cursor()
+    query = '''SELECT AB.building_name, AU.unit_number, 
+                      T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name, 
+                      T.contact_number, T.move_in_date, T.lease_start_date, T.lease_end_date
+               FROM Tenant AS T
+               INNER JOIN Apartment_Unit AS AU ON T.Tenant_id = AU.unit_id
+               INNER JOIN Apartment_Building AS AB ON AU.building_id = AB.building_id
+               WHERE 1=1 '''
+
+    params = []
+    if search_name != "Search Name...":
+        query += " AND (T.firstName || ' ' || T.middleName || ' ' || T.lastName LIKE ?)"
+        params.append(f"%{search_name}%")
+
+    if from_date:
+        query += " AND T.lease_start_date >= ?"
+        params.append(from_date.strftime('%Y-%m-%d'))
+
+    if to_date:
+        query += " AND T.lease_start_date <= ?"
+        params.append(to_date.strftime('%Y-%m-%d'))
+
+    query += " ORDER BY T.lease_start_date ASC"
+    cursor.execute(query, params)
+    return cursor.fetchall()
+
+
+
 # ================ add_tenant PAGE FUNCTIONS =======================
 
 def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_number, move_in_date,
                   lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
-                  emergency_contact_relationship, tenant_dob, sex):
+                  emergency_contact_relationship, tenant_dob, sex, income):
     admin_id = get_admin_id(conn)
     if not admin_id:
         return None  # Return None if admin_id is not available
@@ -494,14 +523,15 @@ def insert_tenant(conn, lastName, firstName, middleName, suffix, email, contact_
                 Emergency_contact_number, 
                 Emergency_contact_relationship, 
                 tenant_dob, 
-                sex
+                sex,
+                income
             ) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         ''', (admin_id, lastName, firstName, middleName, suffix, email,
               contact_number, move_in_date,
               lease_start_date, lease_end_date, emergency_contact_name,
               emergency_contact_number,
-              emergency_contact_relationship, tenant_dob, sex))
+              emergency_contact_relationship, tenant_dob, sex, income))
 
         # Fetch the inserted tenant_id
         tenant_id = cursor.lastrowid

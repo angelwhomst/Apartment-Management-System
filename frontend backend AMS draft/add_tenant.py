@@ -137,6 +137,7 @@ class AddTenantComponent:
         emergency_contact_number = self.entry_emergency_contact_number.get()
         emergency_contact_name = self.entry_emergency_contact_name.get()
         emergency_contact_relationship = self.entry_relationship.get()
+        income = self.entry_income.get()
 
         # Map the selected sex to its integer value
         sex_int = sex_mapping.get(sex)
@@ -144,6 +145,10 @@ class AddTenantComponent:
         # Validate required fields
         if not unit_number or not last_name or not first_name:
             CTkMessagebox(title="Error", message="All fields are required.")
+            return
+
+        if not income.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on tenant income.")
             return
 
         # Proceed to save data to the database
@@ -158,7 +163,7 @@ class AddTenantComponent:
                 conn, last_name, first_name, middle_name, suffix, email, contact_number,
                 move_in_date, lease_start_date, lease_end_date,
                 emergency_contact_name, emergency_contact_number, emergency_contact_relationship,
-                birthdate, sex_int
+                birthdate, sex_int, income
             )
 
             if self.display_tenant_id:
@@ -201,6 +206,11 @@ class AddTenantComponent:
 
                 # Create an instance of DisplayTenantComponent and pass the new window as its parent
                 DisplayTenantComponent(self.display_tenant_info_window, self.display_tenant_id)
+
+                # # Update Treeview with new tenant data
+                # from tenant_information import TenantInformationFrame
+                # new_tenant_data = (unit_number, last_name, first_name, contact_number, "Active", move_in_date)
+                # self.controller.frames[TenantInformationFrame].add_tenant_to_treeview(new_tenant_data)
 
             else:
                 CTkMessagebox(title="Error", message="Failed to save tenant information.")

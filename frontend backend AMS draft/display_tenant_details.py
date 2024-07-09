@@ -117,8 +117,6 @@ class DisplayTenantComponent:
             "font": ('Century Gothic', 20, "bold")
         }
 
-        save_button = ctk.CTkButton(parent, text="Save", command=self.edit_tenant_info, **button_style)
-        save_button.place(relx=0.85, rely=0.90, anchor='center')
 
     def populate_tenant_info(self):
         conn = draft_backend.get_db_connection()
