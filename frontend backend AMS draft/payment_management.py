@@ -3,6 +3,7 @@ import customtkinter
 import customtkinter as ctk
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkcalendar import DateEntry
 from base import BaseFrame
 from login import LoginFrame
 from profile import ProfileFrame
@@ -32,6 +33,102 @@ class PaymentManagementFrame(BaseFrame):
         PaymentManagementLabel = ctk.CTkLabel(master=self, text="Payment Management", fg_color="White",
                                               text_color="#3D291F", font=("Century Gothic", 45, "bold"))
         PaymentManagementLabel.place(relx=0.23, rely=0.18)
+        # Combo box and entries
+        self.entry_first_name = ctk.CTkEntry(self, width=200, height=30,
+                                                       font=('Century Gothic', 15), border_color="#937A69")
+
+        self.entry_first_name.place(relx=0.325, rely=0.465, anchor="center")
+
+        self.entry_middle_name = ctk.CTkEntry(self, width=200, height=30,
+                                                 font=('Century Gothic', 15), border_color="#937A69")
+
+        self.entry_middle_name.place(relx=0.325, rely=0.545, anchor="center")
+
+        self.entry_last_name = ctk.CTkEntry(self, width=200, height=30,
+                                              font=('Century Gothic', 15), border_color="#937A69")
+
+        self.entry_last_name.place(relx=0.325, rely=0.625, anchor="center")
+
+        self.entry_bill = ctk.CTkEntry(self, width=200, height=30,
+                                            font=('Century Gothic', 15), border_color="#937A69")
+
+        self.entry_bill.place(relx=0.490, rely=0.545, anchor="center")
+
+        self.combo_box_unit_number = ctk.CTkComboBox(self, width=200, height=30,
+                                            font=('Century Gothic', 15), border_color="#937A69")
+
+        self.combo_box_unit_number.place(relx=0.490, rely=0.465, anchor="center")
+
+        self.payment_date = DateEntry(self, width=21, height=30,
+                                       font=('Century Gothic', 15), border_color="#937A69")
+
+        self.payment_date.place(relx=0.490, rely=0.775, anchor="center")
+
+        self.combo_box_MOP = ctk.CTkComboBox(self, width=200, height=30,
+                                                     font=('Century Gothic', 15), border_color="#937A69")
+
+        self.combo_box_MOP.place(relx=0.325, rely=0.780, anchor="center")
+
+        self.entry_amount = ctk.CTkEntry(self, width=200, height=30,
+                                       font=('Century Gothic', 15), border_color="#937A69")
+
+        self.entry_amount.place(relx=0.325, rely=0.860, anchor="center")
+
+        # Transaction history
+
+        transaction_button = ctk.CTkButton(master=self, text="Transaction History", corner_radius=5, fg_color="#BDA588",
+                                           hover_color="#D6BC9D", text_color="black", bg_color="White",
+                                           font=('Century Gothic', 16,), width=205, height=30)
+        transaction_button.place(relx=0.825, rely=0.250)
+        # Add Search Button
+        search_button = ctk.CTkButton(master=self, text="Search", corner_radius=5, fg_color="#BDA588",
+                                      hover_color="#D6BC9D", text_color="black", bg_color="White",
+                                      font=('Century Gothic', 16,), width=100, height=25)
+        search_button.place(relx=0.625, rely=0.300)
+
+        # Add Clear Filter Button
+        clear_filter_button = ctk.CTkButton(master=self, text="Clear Filter", corner_radius=5, fg_color="#B8C8D3",
+                                            hover_color="#9EA3AC", text_color="black", bg_color="White",
+                                            font=('Century Gothic', 16,), width=100, height=30)
+        clear_filter_button.place(relx=0.895, rely=0.295)
+
+        # Add Delete Button
+
+        delete_button = ctk.CTkButton(master=self, text="Delete", corner_radius=5, fg_color="#B8C8D3",
+                                      hover_color="#9EA3AC", text_color="black", bg_color="White",
+                                      font=('Century Gothic', 16,), width=100, height=30)
+        delete_button.place(relx=0.825, rely=0.295)
+
+        save_button = ctk.CTkButton(master=self, text="Save", corner_radius=5, fg_color="#BDA588",
+                                      hover_color="#D6BC9D", text_color="black", bg_color="#D8CCC4",
+                                      font=('Century Gothic', 16,), width=100, height=30)
+        save_button.place(relx=0.458, rely=0.860, anchor="center")
+
+        # Add To: DateEntry
+        self.to_date_entry = DateEntry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=12)
+        self.to_date_entry.place(relx=0.430, rely=0.300)
+
+        # Add From: DateEntry
+        self.from_date_entry = DateEntry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=12)
+        self.from_date_entry.place(relx=0.520, rely=0.300)
+
+        # Add Search Entry with Placeholder Text
+        def on_entry_click(event):
+            if self.search_entry.get() == "Search Name...":
+                self.search_entry.delete(0, tk.END)
+                self.search_entry.config(fg="black")
+
+        def on_focus_out(event):
+            if self.search_entry.get() == "":
+                self.search_entry.insert(0, "Search Name...")
+                self.search_entry.config(fg="#5c483f")
+
+        self.search_entry = tk.Entry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=30)
+        self.search_entry.insert(0, "Search Name...")
+        self.search_entry.bind('<FocusIn>', on_entry_click)
+        self.search_entry.bind('<FocusOut>', on_focus_out)
+        self.search_entry.place(relx=0.235, rely=0.300)
+
 
         # Ensure the sidebar is setup after the background images
         self.setup_sidebar()
@@ -47,7 +144,7 @@ class PaymentManagementFrame(BaseFrame):
 
     def add_treeview(self):
         # Create Treeview
-        columns = ("Building Number", "Unit Number", "Tenant Name", "Due Date")
+        columns = ("Building Number", "Unit Number", "Tenant Name", "Due Date", "Bill")
         tree = ttk.Treeview(self, columns=columns, show='headings')
 
         # Define headings with adjusted styles
@@ -76,8 +173,8 @@ class PaymentManagementFrame(BaseFrame):
 
         # Example data (adjust as needed)
         data = [
-            ("June/22/2004", "101", "Utilities", "SalamAaaaa-- --"),
-            ("August/10/2004", "202", "Advertising", "tHankyouUU so MuuUU"),
+            ("June/22/2004", "101", "Utilities", "SalamAaaaa-- --","6559"),
+            ("August/10/2004", "202", "Advertising", "tHankyouUU so MuuUU","1000"),
             # Add more data if needed
         ]
 
