@@ -1,12 +1,27 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from tkinter import END
+
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
+
 from base import BaseFrame
 from login import LoginFrame
 from profile import ProfileFrame
 from PIL import Image
 from tkcalendar import DateEntry  # Import DateEntry from tkcalendar
 import draft_backend
+
+# mapping from combobox values to database int values for expense_type
+expense_type_mapping = {
+    'Utilities': 1,
+    'Maintenance and Repairs': 2,
+    'Advertising': 3,
+    'Insurance': 4,
+    'Administrative Costs': 5,
+    'Property Management Costs': 6
+}
+
 
 class ExpenseFrame(BaseFrame):
     def __init__(self, parent, controller):
@@ -72,16 +87,19 @@ class ExpenseFrame(BaseFrame):
 
         save_button = ctk.CTkButton(master=self, text="Save", corner_radius=5, fg_color="#BDA588",
                                     hover_color="#D6BC9D", text_color="black", bg_color="#D8CCC4",
-                                    font=('Century Gothic', 16,), width=100, height=30)
+                                    font=('Century Gothic', 16,), width=100, height=30, command=self.save_expense)
         save_button.place(relx=0.540, rely=0.900, anchor="center")
 
         self.entry_expense = ctk.CTkEntry(self, width=215, height=30,
-                                              font=('Century Gothic', 15), border_color="#937A69")
+                                          font=('Century Gothic', 15), border_color="#937A69")
 
         self.entry_expense.place(relx=0.327, rely=0.685, anchor="center")
 
-        self.combo_box_expense_type= ctk.CTkComboBox(self, width=215, height=30,
-                                                     font=('Century Gothic', 15), border_color="#937A69")
+        # Expense Type ComboBox
+        expense_types = ['Utilities', 'Maintenance and Repairs', 'Advertising', 'Insurance', 'Administrative Costs',
+                         'Property Management Costs']
+        self.combo_box_expense_type = ctk.CTkComboBox(self, values=expense_types, width=215, height=30,
+                                                      font=('Century Gothic', 15), border_color="#937A69")
 
         self.combo_box_expense_type.place(relx=0.327, rely=0.765, anchor="center")
 
@@ -99,7 +117,8 @@ class ExpenseFrame(BaseFrame):
         self.from_date_entry.place(relx=0.415, rely=0.300)
 
         # Expense DateEntry
-        self.expense_date_entry = DateEntry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=21, height=30)
+        self.expense_date_entry = DateEntry(self, font=('Century Gothic', 16), bg="white", fg="#5c483f", width=21,
+                                            height=30)
         self.expense_date_entry.place(relx=0.257, rely=0.585)
 
     def add_treeview(self):
@@ -134,9 +153,42 @@ class ExpenseFrame(BaseFrame):
         # Bind double click to select
         self.tree.bind("<Double-1>", self.on_treeview_select)
 
-    def save_data(self):
-        # Placeholder for save functionality
-        pass
+    def save_expense(self):
+        # Collect data from the entry fields
+        expense_date = self.expense_date_entry.get_date()
+        expense_amount = self.entry_expense.get()
+        expense_type = self.combo_box_expense_type.get()
+        description = self.entry_description.get()
+
+        # map the selected expense type to its integer value
+        expense_type_int = expense_type_mapping.get(expense_type)
+
+        # validate user inputs
+        if not expense_amount.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on expense amount.")
+            return
+
+        # proceed to save data to the database
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+        try:
+            draft_backend.insert_expense(conn, expense_date, expense_amount, expense_type_int, description)
+            CTkMessagebox(title="Success", message="Expense information saved successfully!")
+
+            self.clear_entry_fields()
+            self.populate_treeview()
+
+        except Exception as e:
+            CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
+        finally:
+            conn.close()
+
+    def clear_entry_fields(self):
+        self.entry_expense.delete(0, END)
+        self.expense_date_entry.delete(0, END)
+        self.entry_description.delete(0, END)
 
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
