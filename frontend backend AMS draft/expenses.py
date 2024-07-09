@@ -178,7 +178,7 @@ class ExpenseFrame(BaseFrame):
             CTkMessagebox(title="Success", message="Expense information saved successfully!")
 
             self.clear_entry_fields()
-            self.populate_treeview()
+        #    self.populate_treeview()
 
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
