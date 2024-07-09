@@ -853,12 +853,14 @@ def fetch_payment_treeview(conn):
                     AU.rental_rate
                     FROM Tenant AS T
                 INNER JOIN Apartment_Unit AS AU
-                    ON T.tenant_id = AU.unit_id
+                    ON T.unit_id = AU.unit_id
                 INNER JOIN Apartment_Building AS AB
                     ON AU.building_id = AB.building_id
+                LEFT JOIN Payment AS P
+                    ON T.tenant_id = P.tenant_id
                 WHERE T.is_deleted = 0
                 AND AU.availability_status=2
-                ORDER BY T.lease_end_date ASC;
+                ORDER BY T.lease_end_date ASC
                 ''')
     return cursor.fetchall()
 
