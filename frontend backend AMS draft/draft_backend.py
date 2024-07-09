@@ -860,7 +860,7 @@ def fetch_payment_treeview(conn):
                     ON T.tenant_id = P.tenant_id
                 WHERE T.is_deleted = 0
                 AND AU.availability_status=2
-                ORDER BY T.lease_end_date ASC
+                ORDER BY P.payment_date ASC;
                 ''')
     return cursor.fetchall()
 
