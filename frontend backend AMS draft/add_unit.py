@@ -108,7 +108,17 @@ class AddUnitComponent:
         # Fetch the selected building name from the combo box
         building_name = self.combo_box_building_name.get()
 
-        # Validate required fields
+        # validate user inputs
+        if not rental_rate.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on rental rate amount.")
+            return
+
+        if not number_of_bedrooms.isdigit():
+            CTkMessagebox(title="Error", message="Please input digits only on number of beds.")
+
+        if not number_of_bathrooms.isdigit():
+            CTkMessagebox(title="Error", message="Please input digits only on number of beds.")
+
         if not unit_number:
             CTkMessagebox(title="Error", message="Unit number is required.")
             return
