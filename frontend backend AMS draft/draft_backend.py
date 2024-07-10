@@ -109,6 +109,7 @@ def create_tables(conn):
     amount         FLOAT   NOT NULL,
     payment_date   DATE    NOT NULL,
     payment_method INTEGER NOT NULL,
+    is_deleted                     INTEGER      DEFAULT (0),
     FOREIGN KEY (
         tenant_id
     )
@@ -991,7 +992,7 @@ def delete_payment(conn, payment_id):
     cursor.execute('''UPDATE Payment
 SET
 is_deleted = 1
-WHERE payment = ?;''', (payment_id,))
+WHERE payment_id = ?;''', (payment_id,))
     conn.commit()
 
 
