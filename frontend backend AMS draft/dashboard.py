@@ -121,7 +121,10 @@ class DashboardFrame(BaseFrame):
         self.label_vars['label_total_units'].set(f'{total_units}')
 
         monthly_rate = draft_backend.average_rental_rate(conn)
-        self.label_vars['label_rental_rates'].set(f'₱{monthly_rate:,.2f}')
+        if monthly_rate is not None:
+            self.label_vars['label_rental_rates'].set(f'₱{monthly_rate:,.2f}')
+        else:
+            self.label_vars['label_rental_rates'].set('N/A')
 
         lease_expirations_alerts = draft_backend.count_lease_expiration_alerts(conn)
         self.label_vars['label_expiration_Alerts'].set(f'{lease_expirations_alerts}')
@@ -130,7 +133,10 @@ class DashboardFrame(BaseFrame):
         self.label_vars['label_recent_tenants'].set(f'{recent_tenants}')
 
         monthly_earnings = draft_backend.monthly_earnings(conn)
-        self.label_vars['label_monthly_earnings'].set(f'₱{monthly_earnings:,.2f}')
+        if monthly_earnings is not None:
+            self.label_vars['label_monthly_earnings'].set(f'₱{monthly_earnings:,.2f}')
+        else:
+            self.label_vars['label_monthly_earnings'].set('N/A')
 
         maintenance_requests = draft_backend.count_maintenance_requests(conn)
         self.label_vars['label_maintenance_requests'].set(f'{maintenance_requests}')
