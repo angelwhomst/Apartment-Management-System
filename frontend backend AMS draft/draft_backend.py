@@ -727,7 +727,8 @@ WHERE expense_id = ?;''', (expense_id,))
 # ================ dashboard PAGE FUNCTIONS =======================
 def total_units(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit;')
+    cursor.execute('''SELECT COUNT(*) FROM Apartment_Unit
+                        WHERE is_deleted = 0;''')
     return cursor.fetchone()[0]
 
 
@@ -739,7 +740,8 @@ INNER JOIN Apartment_Unit AS AU
     ON T.Unit_id = AU.unit_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
-WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now');
+WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
+AND T.is_deleted = 0 AND AU.is_deleted = 0 AND AB.is_deleted = 0;
 ''')
     return cursor.fetchone()[0]
 
@@ -765,45 +767,45 @@ LEFT JOIN Tenant AS T
     ON AU.unit_id = T.tenant_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
-WHERE AU.maintenance_request = 1;''')
+WHERE AU.maintenance_request = 1 AND AU.is_deleted = 0''')
     return cursor.fetchone()[0]
 
 
 # ================ See More total_units FUNCTIONS =======================
 def count_available_units(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 1')
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 1 AND is_deleted = 0')
     return cursor.fetchone()[0]
 
 
 def count_occupied_units(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 2')
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 2 AND is_deleted = 0')
     return cursor.fetchone()[0]
 
 
 def count_under_maintenance_units(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 3')
+    cursor.execute('SELECT COUNT(*) FROM Apartment_Unit WHERE availability_status = 3 AND is_deleted = 0')
     return cursor.fetchone()[0]
 
 
 # ================ See More rental_rates FUNCTIONS =======================
 def average_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT AVG (rental_rate) FROM Apartment_Unit')
+    cursor.execute('SELECT AVG (rental_rate) FROM Apartment_Unit WHERE is_deleted = 0;')
     return cursor.fetchone()[0]
 
 
 def maximum_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT MAX (rental_rate) FROM Apartment_Unit')
+    cursor.execute('SELECT MAX (rental_rate) FROM Apartment_Unit WHERE is_deleted = 0')
     return cursor.fetchone()[0]
 
 
 def minimum_rental_rate(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT MIN (rental_rate) FROM Apartment_Unit')
+    cursor.execute('SELECT MIN (rental_rate) FROM Apartment_Unit WHERE is_deleted = 0')
     return cursor.fetchone()[0]
 
 
@@ -816,14 +818,14 @@ def rent_collection(conn):
 
 def monthly_expense(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT SUM(expense_amount) FROM Expenses;')
+    cursor.execute('SELECT SUM(expense_amount) FROM Expenses WHERE is_deleted = 0;')
     return cursor.fetchone()[0]
 
 
 def monthly_earnings(conn):
     cursor = conn.cursor()
     cursor.execute('''SELECT (SELECT (SELECT COALESCE(SUM(amount), 0)FROM Payment) - COALESCE(SUM(expense_amount), 0) 
-                        FROM Expenses)  AS earnings;
+                        FROM Expenses WHERE is_deleted = 0)  AS earnings;
                         -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
 ''')
     return cursor.fetchone()[0]
@@ -847,6 +849,7 @@ INNER JOIN Apartment_Unit AS AU
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
 WHERE T.lease_end_date <= DATE('now', '+30 days') AND T.lease_end_date >= DATE('now')
+AND T.is_deleted = 0
 ORDER BY T.lease_end_date ASC;''')
         rows = cursor.fetchall()
         return rows
@@ -874,7 +877,7 @@ LEFT JOIN Tenant AS T
     ON AU.unit_id = T.tenant_id
 INNER JOIN Apartment_Building AS AB
     ON AU.building_id = AB.building_id
-WHERE AU.maintenance_request = 1;''')
+WHERE AU.maintenance_request = 1 AND AU.is_deleted = 0;''')
         rows = cursor.fetchall()
         return rows
     except Exception as e:
