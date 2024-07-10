@@ -271,7 +271,7 @@ class ExpenseFrame(BaseFrame):
                         try:
                             draft_backend.delete_expense(conn, expense_id)
                         except Exception as e:
-                            CTkMessagebox(title="Error", message=f"Error deleting from database: {str(e)}")
+                            CTkMessagebox(title="Error", message=f"Error deleting: {str(e)}")
                         finally:
                             conn.close()
         else:

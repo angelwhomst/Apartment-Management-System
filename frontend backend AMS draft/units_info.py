@@ -1,5 +1,6 @@
 from tkinter import ttk
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import tkinter as tk
 from base import BaseFrame
@@ -106,7 +107,7 @@ class UnitsInfoFrame(BaseFrame):
 
         delete_button = ctk.CTkButton(master=self, text="Delete", corner_radius=5, fg_color="#B8C8D3",
                                       hover_color="#9EA3AC", text_color="black", bg_color="White",
-                                      font=('Century Gothic', 16,), width=100, height=30)
+                                      font=('Century Gothic', 16,), width=100, height=30, command=self.delete_selected)
         delete_button.place(relx=0.825, rely=0.295)
 
 
@@ -162,13 +163,6 @@ class UnitsInfoFrame(BaseFrame):
 
             # Iterate over fetched units and update or insert into Treeview
             for unit in units:
-                # Debug print to check data
-                print(f"Fetched unit data: {unit} with length {len(unit)}")
-
-                if len(unit) != 9:
-                    print(f"Error: Expected 9 elements, got {len(unit)}")
-                    continue  # Skip this row if it doesn't have the expected number of elements
-
                 building_name = self.replace_none(unit[1])
                 unit_number = self.replace_none(unit[2])
                 rental_rate = self.replace_none(unit[3])
@@ -243,3 +237,31 @@ class UnitsInfoFrame(BaseFrame):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
+    def delete_selected(self):
+        selected_item = self.tree.selection()  # Get selected item(s)
+        if selected_item:
+            response = CTkMessagebox(title="Delete Confirmation",
+                                     message="Are you sure you want to delete the selected unit?",
+                                     icon="warning",
+                                     option_1="Yes",
+                                     option_2="No").get()
+
+            if response == "Yes":
+                for item in selected_item:
+                    # Get the unit_id from the hidden column
+                    unit_id = self.tree.item(item, 'values')[8]
+
+                    # Delete from Treeview
+                    self.tree.delete(item)
+
+                    # Delete from Database
+                    conn = draft_backend.get_db_connection()
+                    if conn:
+                        try:
+                            draft_backend.delete_unit(conn, unit_id)
+                        except Exception as e:
+                            CTkMessagebox(title="Error", message=f"Error deleting: {str(e)}")
+                        finally:
+                            conn.close()
+        else:
+            CTkMessagebox(title="Error", message="No item selected.")

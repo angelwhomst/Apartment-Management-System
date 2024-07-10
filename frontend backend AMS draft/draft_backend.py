@@ -152,6 +152,7 @@ def create_tables(conn):
 
     conn.commit()
 
+
 # ============================================================
 
 
@@ -504,8 +505,16 @@ def fetch_tenants_by_filters(conn, search_name, from_date, to_date):
     return cursor.fetchall()
 
 
-# ================ add_tenant PAGE FUNCTIONS =======================
+def delete_tenant(conn, tenant_id):
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE tenant
+SET
+is_deleted = 1
+WHERE tenant_id = ?;''', (tenant_id,))
+    conn.commit()
 
+
+# ================ add_tenant PAGE FUNCTIONS =======================
 def fetch_building_name(conn):
     cursor = conn.cursor()
     cursor.execute('select distinct building_name from apartment_building;')
@@ -1001,7 +1010,7 @@ WHERE building_id = ?;''', (building_id,))
     conn.commit()
 
 
-# ================ tenant_information PAGE FUNCTIONS =======================
+# ================ units_info PAGE FUNCTIONS =======================
 
 def fetch_unit_information_treeview(conn):
     cursor = conn.cursor()
@@ -1010,9 +1019,9 @@ def fetch_unit_information_treeview(conn):
             u.unit_number,
             u.rental_rate,
             CASE
-                WHEN u.availability_status = 0 THEN 'Not Available'
                 WHEN u.availability_status = 1 THEN 'Available'
-                ELSE 'Unknown'
+                WHEN u.availability_status = 2 THEN 'Occupied'
+                ELSE 'Under Maintenance'
             END availability_status,
             u.num_bedrooms,
             u.num_bathrooms,
@@ -1043,9 +1052,9 @@ def search_unit_information_treeview(conn, search_term):
     u.unit_number,
     u.rental_rate,
     CASE
-        WHEN u.availability_status = 0 THEN 'Not Available'
         WHEN u.availability_status = 1 THEN 'Available'
-        ELSE 'Unknown'
+        WHEN u.availability_status = 2 THEN 'Occupied'
+        ELSE 'Under Maintenance'
     END availability_status,
     u.num_bedrooms,
     u.num_bathrooms,
@@ -1068,4 +1077,13 @@ ORDER BY
 ''', (search_term,))
     unit_info = cursor.fetchall()
     return unit_info
+
+
+def delete_unit(conn, unit_id):
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE Apartment_Unit
+SET
+is_deleted = 1
+WHERE unit_id = ?;''', (unit_id,))
+    conn.commit()
 
