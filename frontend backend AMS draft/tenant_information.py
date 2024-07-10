@@ -18,6 +18,9 @@ class TenantInformationFrame(BaseFrame):
         self.create_widgets()
         self.populate_treeview()
 
+        # Bind double-click event on Treeview
+        self.tree.bind("<Double-1>", self.show_tenant_details)
+
     def create_widgets(self):
         # Add background image
         dashboard_bg_image = PIL.Image.open("images/tenantInformationbg.jpg")
@@ -52,6 +55,8 @@ class TenantInformationFrame(BaseFrame):
             self.tree.heading(col, text=col, anchor='w')
             self.tree.column(col, anchor='w', width=190)  # Align data to the left
 
+        # # Bind the Treeview row click event
+        # self.tree.bind("<ButtonRelease-1>", self.on_row_click)
 
         # Style Treeview
         style = ttk.Style(self)
@@ -147,7 +152,7 @@ class TenantInformationFrame(BaseFrame):
             conn.close()
             for row in tenant_data:
                 # Insert the row with the hidden ID column
-                self.tree.insert("", "end", values=(row[0], *row[1:]))
+                self.tree.insert("", "end", values=(row[1], row[2], row[3], row[4], row[5], row[0]))
 
     def refresh_data(self):
         conn = draft_backend.get_db_connection()
@@ -164,16 +169,17 @@ class TenantInformationFrame(BaseFrame):
             # Iterate over fetched tenants and update or insert into Treeview
             for tenant in tenants:
                 # Extract relevant values
-                building_name = tenant[0]
-                unit_number = tenant[1]
-                tenant_name = tenant[2]
-                contact_number = tenant[3]
-                payment_status = tenant[4]
-                lease_start_date = tenant[5]
+                building_name = tenant[1]
+                unit_number = tenant[2]
+                tenant_name = tenant[3]
+                contact_number = tenant[4]
+                payment_status = tenant[5]
+                lease_start_date = tenant[6]
+                tenant_id = tenant[0]
 
                 # Insert or update Treeview item
                 self.tree.insert("", "end", values=(building_name, unit_number, tenant_name, contact_number,
-                                                    payment_status, lease_start_date))
+                                                    payment_status, lease_start_date, tenant_id))
 
         except Exception as e:
             print(f"Error fetching data: {str(e)}")
@@ -248,25 +254,18 @@ class TenantInformationFrame(BaseFrame):
         for item in self.tree.get_children():
             self.tree.delete(item)
 
-    # def on_tree_select(self, event):
-    #     selected_item = self.tree.selection()[0]
-    #     tenant_id = self.tree.item(selected_item, 'values')[0]  # Fetch the hidden ID
-    #     self.show_tenant_details(tenant_id)
-    #
-    # def show_tenant_details(self, tenant_id):
-    #     # Ensure DisplayTenantComponent is initialized and added to frames
-    #     if DisplayTenantComponent not in self.controller.frames:
-    #         self.controller.frames[DisplayTenantComponent] = DisplayTenantComponent(self.controller.container, tenant_id=tenant_id)
-    #
-    #     # Show the frame
-    #
-    #     top_level = ctk.CTkToplevel(self)
-    #     top_level.title("Display Tenant Details")
-    #     top_level.geometry("900x600+100+100")
-    #     top_level.attributes("-topmost", True)
-    #
-    #     display_tenant_frame = self.controller.frames[DisplayTenantComponent]
-    #     display_tenant_frame.populate_tenant_info(tenant_id)
-    #     self.controller.show_frame(DisplayTenantComponent)
+    def show_tenant_details(self, event):
+        # Get the selected item from Treeview
+        item = self.tree.selection()[0]
+        # Retrieve the tenant_id (the last column in the Treeview)
+        tenant_id = self.tree.item(item, "values")[-1]
+
+        # Open a new window to display tenant details
+        top_level_window = tk.Toplevel(self)
+        top_level_window.title("Tenant Details")
+        top_level_window.geometry("900x600")
+
+        # Create an instance of DisplayTenantComponent and pass tenant_id
+        DisplayTenantComponent(top_level_window, tenant_id)
 
 

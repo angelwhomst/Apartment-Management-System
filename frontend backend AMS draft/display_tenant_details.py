@@ -39,7 +39,7 @@ class DisplayTenantComponent:
 
     def create_widgets(self, parent):
         # Add background image
-        building_bg_image = Image.open("images/addTenantBg.png")
+        building_bg_image = Image.open("images/DisplayTenantBg.png")
         building_bg = ctk.CTkImage(building_bg_image, size=(900, 600))
         building_bg_lbl = ctk.CTkLabel(parent, text="", image=building_bg)
         building_bg_lbl.place(x=0, y=0)
@@ -48,65 +48,69 @@ class DisplayTenantComponent:
         self.entry_tenant_name = CTkEntry(parent, textvariable=self.tenant_name_var,
                                           placeholder_text="Enter tenant name",
                                           width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_tenant_name.place(relx=0.310, rely=0.425, anchor="center")
+        self.entry_tenant_name.place(relx=0.310, rely=0.368, anchor="center")
 
         self.entry_contactnum = CTkEntry(parent, textvariable=self.contactnum_var,
                                          placeholder_text="Enter contact number",
                                          width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_contactnum.place(relx=0.310, rely=0.482, anchor="center")
+        self.entry_contactnum.place(relx=0.310, rely=0.425, anchor="center")
 
         self.entry_email = CTkEntry(parent, textvariable=self.email_var, placeholder_text="Enter email",
                                     width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_email.place(relx=0.310, rely=0.539, anchor="center")
+        self.entry_email.place(relx=0.310, rely=0.482, anchor="center")
 
         self.entry_unit_number = CTkEntry(parent, textvariable=self.unit_number_var,
                                           placeholder_text="Enter unit number",
                                           width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_unit_number.place(relx=0.310, rely=0.596, anchor="center")
+        self.entry_unit_number.place(relx=0.310, rely=0.539, anchor="center")
 
         self.entry_sex = CTkEntry(parent, textvariable=self.sex_var, placeholder_text="Enter sex",
                                   width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_sex.place(relx=0.310, rely=0.653, anchor="center")
+        self.entry_sex.place(relx=0.310, rely=0.596, anchor="center")
 
         self.entry_birthdate = CTkEntry(parent, textvariable=self.birthdate_var, placeholder_text="Enter birthdate",
                                         width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_birthdate.place(relx=0.310, rely=0.710, anchor="center")
+        self.entry_birthdate.place(relx=0.310, rely=0.653, anchor="center")
+
+        self.entry_income = CTkEntry(parent, textvariable=self.birthdate_var, placeholder_text="Enter income",
+                                     width=230, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_income.place(relx=0.310, rely=0.710, anchor="center")
 
         self.entry_move_in = CTkEntry(parent, textvariable=self.move_in_var, placeholder_text="Enter move in date",
-                                      width=200, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_move_in.place(relx=0.840, rely=0.425, anchor="center")
+                                      width=185, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_move_in.place(relx=0.850, rely=0.368, anchor="center")
 
         self.entry_lease_start = CTkEntry(parent, textvariable=self.lease_start_var,
                                           placeholder_text="Enter lease start date",
-                                          width=200, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_lease_start.place(relx=0.840, rely=0.482, anchor="center")
+                                          width=185, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_lease_start.place(relx=0.850, rely=0.425, anchor="center")
 
         self.entry_lease_end = CTkEntry(parent, textvariable=self.lease_end_var,
                                         placeholder_text="Enter lease end date",
-                                        width=200, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_lease_end.place(relx=0.840, rely=0.539, anchor="center")
+                                        width=185, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_lease_end.place(relx=0.850, rely=0.482, anchor="center")
 
         self.entry_last_payment = CTkEntry(parent, textvariable=self.last_payment_var,
                                            placeholder_text="Enter last payment date",
-                                           width=200, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_last_payment.place(relx=0.840, rely=0.596, anchor="center")
+                                           width=185, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_last_payment.place(relx=0.850, rely=0.539, anchor="center")
 
         self.entry_emergency_contact_number = CTkEntry(parent, textvariable=self.emergency_contact_number_var,
                                                        placeholder_text="Enter emergency contact number",
                                                        width=250, height=25, border_color="#937A69",
                                                        font=('Century Gothic', 12))
-        self.entry_emergency_contact_number.place(relx=0.420, rely=0.800, anchor="center")
+        self.entry_emergency_contact_number.place(relx=0.420, rely=0.7955, anchor="center")
 
         self.entry_emergency_contact_name = CTkEntry(parent, textvariable=self.emergency_contact_name_var,
                                                      placeholder_text="Enter emergency contact name",
                                                      width=250, height=25, border_color="#937A69",
                                                      font=('Century Gothic', 12))
-        self.entry_emergency_contact_name.place(relx=0.420, rely=0.857, anchor="center")
+        self.entry_emergency_contact_name.place(relx=0.420, rely=0.8525, anchor="center")
 
         self.entry_relationship = CTkEntry(parent, textvariable=self.relationship_var,
                                            placeholder_text="Enter relationship",
                                            width=250, height=25, border_color="#937A69", font=('Century Gothic', 12))
-        self.entry_relationship.place(relx=0.420, rely=0.914, anchor="center")
+        self.entry_relationship.place(relx=0.420, rely=0.9095, anchor="center")
 
         # Buttons
         button_style = {
@@ -117,6 +121,8 @@ class DisplayTenantComponent:
             "font": ('Century Gothic', 20, "bold")
         }
 
+        save_button = ctk.CTkButton(parent, text="Save", command=self.edit_tenant_info, **button_style)
+        save_button.place(relx=0.85, rely=0.90, anchor='center')
 
     def populate_tenant_info(self):
         conn = draft_backend.get_db_connection()

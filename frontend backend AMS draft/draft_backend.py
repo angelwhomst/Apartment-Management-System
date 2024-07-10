@@ -411,6 +411,7 @@ def fetch_tenant_treeview(conn):
     try:
         cursor = conn.cursor()
         cursor.execute('''SELECT
+    T.tenant_id,
     AB.building_name,
     AU.unit_number,
     T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
@@ -429,7 +430,7 @@ LEFT JOIN Payment AS P
     ON T.tenant_id = P.tenant_id
     AND P.payment_date BETWEEN T.lease_start_date AND T.lease_end_date
 WHERE T.is_deleted = 0
-ORDER BY T.tenant_id, P.payment_date DESC; -- Ensure tenants are shown correctly and ordered by tenant_id;
+ORDER BY T.tenant_id, P.payment_date DESC; -- ensure tenants are shown correctly and ordered by tenant_id;
 ''')
         rows = cursor.fetchall()
         return rows
@@ -635,6 +636,42 @@ def fetch_latest_payment(conn, tenant_id):
     ''', (tenant_id,))
     payment_info = cursor.fetchone()
     return payment_info
+
+
+def fetch_tenant_by_id(conn, tenant_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''SELECT
+                T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
+                T.contact_number,
+                T.email,
+                AU.unit_number,
+                CASE 
+                    WHEN T.sex = 1 THEN 'Male'
+                    WHEN T.sex = 2 THEN 'Female'
+                    ELSE 'Prefer not to say'
+                END AS sex,
+                T.tenant_dob AS birthdate,
+                T.move_in_date,
+                T.lease_start_date,
+                T.lease_end_date,
+                (SELECT MAX(P.payment_date)
+                 FROM Payment P
+                 WHERE P.tenant_id = T.tenant_id) AS last_payment_date,
+                T.Emergency_contact_name,
+                T.Emergency_contact_number,
+                T.Emergency_contact_relationship
+            FROM
+                Tenant T
+                LEFT JOIN Apartment_Unit AU ON T.tenant_id = AU.unit_id
+            WHERE
+                T.tenant_id = ?''', (tenant_id,))
+        tenant_info = cursor.fetchone()
+        return tenant_info
+
+    except Exception as e:
+        print(f"Error fetching tenant information: {str(e)}")
+        return None
 
 
 # ================ expenses PAGE FUNCTIONS =======================
