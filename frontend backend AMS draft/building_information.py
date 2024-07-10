@@ -20,7 +20,7 @@ class BuildingInformationFrame(BaseFrame):
         dashboard_bg_image = Image.open("images/buildinginfobg.jpg")
         dashboard_bg = ctk.CTkImage(dashboard_bg_image, size=(1550, 800))
         dashboard_bg_lbl = ctk.CTkLabel(self, text="", image=dashboard_bg)
-        dashboard_bg_lbl.place(x=0, y=0,)
+        dashboard_bg_lbl.place(x=0, y=0, )
 
         # Add dashboard container image
         container_image = Image.open("images/dashcontainer.png")
@@ -76,7 +76,6 @@ class BuildingInformationFrame(BaseFrame):
         self.search_entry.bind('<FocusOut>', on_focus_out)
         self.search_entry.place(relx=0.230, rely=0.300)
 
-
     def add_treeview(self):
         # Create Treeview
         columns = ("Building Name", "Country", "Province", "City", "Street", "Lot Number", "Zip Code", "Amenities")
@@ -110,7 +109,6 @@ class BuildingInformationFrame(BaseFrame):
                                       font=('Century Gothic', 16,), width=100, height=30)
         delete_button.place(relx=0.825, rely=0.295)
 
-
         # Style Treeview
         style = ttk.Style(self)
         style.theme_use("clam")  # Use a specific theme that can be customized
@@ -129,7 +127,6 @@ class BuildingInformationFrame(BaseFrame):
 
         # Place Treeview inside the container
         self.tree.place(x=440, y=370, width=1415, height=538)
-
 
     def populate_treeview(self):
         conn = draft_backend.get_db_connection()
@@ -259,6 +256,3 @@ class BuildingInformationFrame(BaseFrame):
 
         # Create an instance of DisplayTenantComponent and pass tenant_id
         DisplayBuildingInformation(top_level_window, building_id)
-
-    def replace_none(self, value, default=""):
-        return value if value is not None else default

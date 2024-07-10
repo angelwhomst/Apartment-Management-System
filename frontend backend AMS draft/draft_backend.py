@@ -969,3 +969,72 @@ def search_building_name(conn, search_name):
     WHERE building_name like '%'||?||'%';
     ''', search_name)
     return cursor.fetchall()
+
+
+# ================ tenant_information PAGE FUNCTIONS =======================
+
+def fetch_unit_information_treeview(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT
+            b.building_name,
+            u.unit_number,
+            u.rental_rate,
+            CASE
+                WHEN u.availability_status = 0 THEN 'Not Available'
+                WHEN u.availability_status = 1 THEN 'Available'
+                ELSE 'Unknown'
+            END availability_status,
+            u.num_bedrooms,
+            u.num_bathrooms,
+            u.unit_size_square_m,
+            CASE
+                WHEN u.maintenance_request = 0 THEN 'No'
+                WHEN u.maintenance_request = 1 THEN 'Yes'
+                ELSE 'Unknown'
+            END maintenance_request,
+            u.unit_id
+        FROM
+            Apartment_Building b
+        JOIN
+            Apartment_Unit u ON b.building_id = u.building_id
+        WHERE
+            b.is_deleted = 0 AND u.is_deleted = 0
+        ORDER BY
+            u.unit_id DESC;
+''')
+    unit_info = cursor.fetchall()
+    return unit_info
+
+
+def search_unit_information_treeview(conn, search_term):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT
+    b.building_name,
+    u.unit_number,
+    u.rental_rate,
+    CASE
+        WHEN u.availability_status = 0 THEN 'Not Available'
+        WHEN u.availability_status = 1 THEN 'Available'
+        ELSE 'Unknown'
+    END availability_status,
+    u.num_bedrooms,
+    u.num_bathrooms,
+    u.unit_size_square_m,
+    CASE
+        WHEN u.maintenance_request = 0 THEN 'No'
+        WHEN u.maintenance_request = 1 THEN 'Yes'
+        ELSE 'Unknown'
+    END maintenance_request,
+    u.unit_id
+FROM
+    Apartment_Building b
+JOIN
+    Apartment_Unit u ON b.building_id = u.building_id
+WHERE
+    b.is_deleted = 0 AND u.is_deleted = 0
+    AND u.unit_number LIKE '%' || ? || '%'
+ORDER BY
+    u.unit_id DESC;
+''', (search_term,))
+    unit_info = cursor.fetchall()
+    return unit_info
