@@ -1,5 +1,6 @@
 from tkinter import ttk
 import customtkinter as ctk
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import tkinter as tk
 from base import BaseFrame
@@ -106,7 +107,7 @@ class BuildingInformationFrame(BaseFrame):
 
         delete_button = ctk.CTkButton(master=self, text="Delete", corner_radius=5, fg_color="#B8C8D3",
                                       hover_color="#9EA3AC", text_color="black", bg_color="White",
-                                      font=('Century Gothic', 16,), width=100, height=30)
+                                      font=('Century Gothic', 16,), width=100, height=30, command=self.delete_selected)
         delete_button.place(relx=0.825, rely=0.295)
 
         # Style Treeview
@@ -256,3 +257,32 @@ class BuildingInformationFrame(BaseFrame):
 
         # Create an instance of DisplayTenantComponent and pass tenant_id
         DisplayBuildingInformation(top_level_window, building_id)
+
+    def delete_selected(self):
+        selected_item = self.tree.selection()  # Get selected item(s)
+        if selected_item:
+            response = CTkMessagebox(title="Delete Confirmation",
+                                     message="Are you sure you want to delete the selected building?",
+                                     icon="warning",
+                                     option_1="Yes",
+                                     option_2="No").get()
+
+            if response == "Yes":
+                for item in selected_item:
+                    # Get the building_id from the hidden column
+                    building_id = self.tree.item(item, 'values')[8]
+
+                    # Delete from Treeview
+                    self.tree.delete(item)
+
+                    # Delete from Database
+                    conn = draft_backend.get_db_connection()
+                    if conn:
+                        try:
+                            draft_backend.delete_building(conn, building_id)
+                        except Exception as e:
+                            CTkMessagebox(title="Error", message=f"Error deleting from database: {str(e)}")
+                        finally:
+                            conn.close()
+        else:
+            CTkMessagebox(title="Error", message="No item selected.")

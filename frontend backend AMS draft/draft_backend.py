@@ -298,7 +298,8 @@ def edit_last_inserted_building_id(conn, building_name, country, province, city,
 # ================ add_unit PAGE FUNCTIONS =======================
 def fetch_building_names(conn):  # function to populate combobox
     cursor = conn.cursor()
-    cursor.execute('SELECT building_name FROM Apartment_Building')
+    cursor.execute('''SELECT building_name FROM Apartment_Building
+                        WHERE is_deleted = 0;''')
     buildings = cursor.fetchall()
     return [building[0] for building in buildings]
 
@@ -939,7 +940,8 @@ def fetch_tenant_id_by_name_and_unit_details(conn, first_name, last_name, unit_n
                 JOIN Apartment_Unit AU ON T.unit_id = AU.unit_id 
                 JOIN Apartment_Building AB ON AU.building_id = AB.building_id 
                 WHERE T.firstName = ? AND T.lastName = ? 
-                AND AU.unit_number = ? AND AB.building_name = ?''',
+                AND AU.unit_number = ? AND AB.building_name = ?
+                AND T.is_deleted = 0 AND AB.is_deleted = 0;''',
                        (first_name, last_name, unit_number, building_name))
         tenant_id = cursor.fetchone()
         if tenant_id:
@@ -957,7 +959,8 @@ def fetch_unit_id_by_number_and_building(conn, unit_number, building_name):
         cursor.execute(
             '''SELECT unit_id FROM Apartment_Unit AU
             JOIN Apartment_Building AB ON AU.building_id = AB.building_id 
-            WHERE AU.unit_number = ? AND AB.building_name = ?''',
+            WHERE AU.unit_number = ? AND AB.building_name = ?
+            AND AU.is_deleted = 0 AND AB.is_deleted=0;''',
             (unit_number, building_name))
         unit_id = cursor.fetchone()
         if unit_id:
@@ -971,7 +974,8 @@ def fetch_unit_id_by_number_and_building(conn, unit_number, building_name):
 # ================ building_information PAGE FUNCTIONS =======================
 def fetch_building_information_treeview(conn):
     cursor = conn.cursor()
-    cursor.execute('''SELECT building_id, building_name, country, province, city, street, lot_number, zip_code, amenities 
+    cursor.execute('''SELECT building_id, building_name, country, province, city, street, lot_number, zip_code, 
+                        amenities 
                       FROM Apartment_Building
                       WHERE is_deleted = 0;''')
     building_info = cursor.fetchall()
@@ -982,9 +986,19 @@ def search_building_name(conn, search_name):
     cursor = conn.cursor()
     cursor.execute('''SELECT building_id, building_name, country, province, city, street, lot_number, zip_code, 
     amenities FROM Apartment_Building
-    WHERE building_name like '%'||?||'%';
+    WHERE building_name like '%'||?||'%'
+    AND is_deleted=0;
     ''', search_name)
     return cursor.fetchall()
+
+
+def delete_building(conn, building_id):
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE Apartment_Building
+SET
+is_deleted = 1
+WHERE building_id = ?;''', (building_id,))
+    conn.commit()
 
 
 # ================ tenant_information PAGE FUNCTIONS =======================
