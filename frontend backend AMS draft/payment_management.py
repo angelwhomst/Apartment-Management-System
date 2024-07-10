@@ -123,7 +123,7 @@ class PaymentManagementFrame(BaseFrame):
 
         delete_button = ctk.CTkButton(master=self, text="Delete", corner_radius=5, fg_color="#B8C8D3",
                                       hover_color="#9EA3AC", text_color="black", bg_color="White",
-                                      font=('Century Gothic', 16,), width=100, height=30)
+                                      font=('Century Gothic', 16,), width=100, height=30, command=self.delete_selected)
         delete_button.place(relx=0.825, rely=0.295)
 
         save_button = ctk.CTkButton(master=self, text="Save", corner_radius=5, fg_color="#BDA588",
@@ -200,7 +200,11 @@ class PaymentManagementFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Building Name", "Unit Number", "Tenant Name", "Due Date", "Bill")
-        self.tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=(*columns, "hidden_id"), show='headings')
+
+        # Hide the ID column
+        self.tree.column("hidden_id", width=0, stretch=False)
+        self.tree.heading("hidden_id", text="")
 
         # Define headings with adjusted styles
         for col in columns:
@@ -234,7 +238,7 @@ class PaymentManagementFrame(BaseFrame):
 
             # insert data into the treeview
             for row in payment:
-                self.tree.insert("", 'end', values=row)
+                self.tree.insert("", 'end', values=(row[1], row[2], row[3], row[4], row[5], row[0]))
 
     def start_refresh(self):
         # Periodically refresh data
@@ -256,15 +260,16 @@ class PaymentManagementFrame(BaseFrame):
             # Iterate over fetched expenses and update or insert into Treeview
             for payment in payments:
                 # Extract relevant values
-                building_name = payment[0]
-                unit_number = payment[1]
-                tenant_name = payment[2]
-                due_date = payment[3]
-                bill = payment[4]
+                building_name = payment[1]
+                unit_number = payment[2]
+                tenant_name = payment[3]
+                due_date = payment[4]
+                bill = payment[5]
+                payment_id = payment[0]
 
                 # Insert or update Treeview item
                 self.tree.insert("", "end", values=(building_name, unit_number, tenant_name, due_date,
-                                                    bill))
+                                                    bill, payment_id))
             # Update the building names in the combobox
             self.update_building_names()
         except Exception as e:
@@ -357,3 +362,32 @@ class PaymentManagementFrame(BaseFrame):
                                    font=('Century Gothic', 20, "bold"), width=90, height=30,
                                    command=lambda: self.controller.show_frame(LoginFrame))
         logout_btn.place(relx=0.920, rely=0.105)
+
+    def delete_selected(self):
+        selected_item = self.tree.selection()  # Get selected item(s)
+        if selected_item:
+            response = CTkMessagebox(title="Delete Confirmation",
+                                     message="Are you sure you want to delete the selected payment?",
+                                     icon="warning",
+                                     option_1="Yes",
+                                     option_2="No").get()
+
+            if response == "Yes":
+                for item in selected_item:
+                    # Get the payment_id from the hidden column
+                    payment_id = self.tree.item(item, 'values')[5]
+
+                    # Delete from Treeview
+                    self.tree.delete(item)
+
+                    # Delete from Database
+                    conn = draft_backend.get_db_connection()
+                    if conn:
+                        try:
+                            draft_backend.delete_payment(conn, payment_id)
+                        except Exception as e:
+                            CTkMessagebox(title="Error", message=f"Error deleting: {str(e)}")
+                        finally:
+                            conn.close()
+        else:
+            CTkMessagebox(title="Error", message="No item selected.")

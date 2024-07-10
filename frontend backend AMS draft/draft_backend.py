@@ -912,7 +912,9 @@ def fetch_recent_tenants(conn):
 # ================ payment_management PAGE FUNCTIONS =======================
 def fetch_payment_treeview(conn):
     cursor = conn.cursor()
-    cursor.execute('''SELECT AB.building_name,
+    cursor.execute('''SELECT 
+                    P.payment_id,
+                    AB.building_name,
                     AU.unit_number,
                     T.firstName || ' ' || T.middleName || ' ' || T.lastName AS tenant_name,
                     T.lease_end_date,
@@ -926,7 +928,8 @@ def fetch_payment_treeview(conn):
                     ON T.tenant_id = P.tenant_id
                 WHERE T.is_deleted = 0
                 AND AU.availability_status=2
-                ORDER BY P.payment_date ASC;
+                AND P.is_deleted = 0
+                ORDER BY P.payment_id DESC;
                 ''')
     return cursor.fetchall()
 
@@ -981,6 +984,15 @@ def fetch_unit_id_by_number_and_building(conn, unit_number, building_name):
     except Exception as e:
         print(f"Error fetching unit ID: {str(e)}")
         return None
+
+
+def delete_payment(conn, payment_id):
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE Payment
+SET
+is_deleted = 1
+WHERE payment = ?;''', (payment_id,))
+    conn.commit()
 
 
 # ================ building_information PAGE FUNCTIONS =======================
