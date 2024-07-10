@@ -66,14 +66,14 @@ class PaymentManagementFrame(BaseFrame):
 
         self.entry_bill.place(relx=0.490, rely=0.545, anchor="center")
 
-        # Fetch building names from the database
-        conn = draft_backend.get_db_connection()
-        if not conn:
-            return
-        building_names = draft_backend.fetch_building_names(conn)
-        conn.close()
+        # # Fetch building names from the database
+        # conn = draft_backend.get_db_connection()
+        # if not conn:
+        #     return
+        # building_names = draft_backend.fetch_building_names(conn)
+        # conn.close()
 
-        self.combo_box_building_name = CTkComboBox(self, values=building_names, width=200, height=30,
+        self.combo_box_building_name = CTkComboBox(self, values=[], width=200, height=30,
                                                    font=('Century Gothic', 12))
         self.combo_box_building_name.place(relx=0.490, rely=0.545, anchor="center")
 
@@ -168,6 +168,21 @@ class PaymentManagementFrame(BaseFrame):
         # Add Treeview with Scrollbar
         self.add_treeview()
 
+        self.update_building_names()
+
+    # Existing code...
+
+    def update_building_names(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        building_names = draft_backend.fetch_building_names(conn)
+        conn.close()
+
+        self.combo_box_building_name.configure(values=building_names)
+
     def update_unit_numbers(self, selected_building):
         conn = draft_backend.get_db_connection()
         if not conn:
@@ -250,7 +265,8 @@ class PaymentManagementFrame(BaseFrame):
                 # Insert or update Treeview item
                 self.tree.insert("", "end", values=(building_name, unit_number, tenant_name, due_date,
                                                     bill))
-
+            # Update the building names in the combobox
+            self.update_building_names()
         except Exception as e:
             print(f"Error fetching data: {str(e)}")
 

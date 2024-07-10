@@ -263,7 +263,7 @@ class TenantInformationFrame(BaseFrame):
         # Open a new window to display tenant details
         top_level_window = tk.Toplevel(self)
         top_level_window.title("Tenant Details")
-        top_level_window.geometry("900x600")
+        top_level_window.geometry("1100x800")
 
         # Create an instance of DisplayTenantComponent and pass tenant_id
         DisplayTenantComponent(top_level_window, tenant_id)
