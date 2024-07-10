@@ -159,25 +159,72 @@ async def create_pdf_report(tenant_data, output_filename):
 #     </div>
 #
 #     <!-- Tenant Demographic Report -->
-#     <div class="last-page">
-#         <h1>Tenant Demographic Report</h1>
-#         <table>
-#             <thead>
-#                 <tr>
-#                     <th>Tenant Name</th>
-#                     <th>Age</th>
-#                     <th>Gender</th>
-#                     <th>Income</th>
-#                 </tr>
-#             </thead>
-#             <tbody>
-#                 {tenant_demographic_table_rows}
-#             </tbody>
-#         </table>
-#         <p>Age Distribution: {age_distribution}</p>
-#         <p>Gender Distribution: {gender_distribution}</p>
-#         <p>Income Range: {income_range}</p>
-#     </div>
+# <div class="last-page">
+#     <h1>Tenant Demographic Report</h1>
+#     <table>
+#         <thead>
+#             <tr>
+#                 <th>Tenant Name</th>
+#                 <th>Age</th>
+#                 <th>Gender</th>
+#                 <th>Income</th>
+#             </tr>
+#         </thead>
+#         <tbody>
+#             <tr>
+#                 <td>Age 18-24</td>
+#                 <td>{age_18_24}</td>
+#             </tr>
+#             <tr>
+#                 <td>Age 25-34</td>
+#                 <td>{age_25_34}</td>
+#             </tr>
+#             <tr>
+#                 <td>Age 35-44</td>
+#                 <td>{age_35_44}</td>
+#             </tr>
+#             <tr>
+#                 <td>Age 45-54</td>
+#                 <td>{age_45_54}</td>
+#             </tr>
+#             <tr>
+#                 <td>Age 55+</td>
+#                 <td>{age_55_plus}</td>
+#             </tr>
+#             <tr>
+#                 <td>Male Count</td>
+#                 <td>{male_count}</td>
+#             </tr>
+#             <tr>
+#                 <td>Female Count</td>
+#                 <td>{female_count}</td>
+#             </tr>
+#             <tr>
+#                 <td>Preferred Not to Say Count</td>
+#                 <td>{preferred_not_to_say_count}</td>
+#             </tr>
+#             <tr>
+#                 <td>Income &lt; 20000</td>
+#                 <td>{income_lt_20000}</td>
+#             </tr>
+#             <tr>
+#                 <td>Income 20000-40000</td>
+#                 <td>{income_20000_40000}</td>
+#             </tr>
+#             <tr>
+#                 <td>Income 40000-60000</td>
+#                 <td>{income_40000_60000}</td>
+#             </tr>
+#             <tr>
+#                 <td>Income &gt; 60000</td>
+#                 <td>{income_gt_60000}</td>
+#             </tr>
+#         </tbody>
+#     </table>
+#     <p>Age Distribution: {age_distribution}</p>
+#     <p>Gender Distribution: {gender_distribution}</p>
+#     <p>Income Range: {income_range}</p>
+# </div>
 # </body>
 # </html>
 # """
