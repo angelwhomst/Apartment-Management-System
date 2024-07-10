@@ -1089,4 +1089,3 @@ SET
 is_deleted = 1
 WHERE unit_id = ?;''', (unit_id,))
     conn.commit()
-
