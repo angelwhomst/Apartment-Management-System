@@ -124,7 +124,11 @@ class ExpenseFrame(BaseFrame):
     def add_treeview(self):
         # Create Treeview
         columns = ("Date", "Amount", "Type", "Description")
-        self.tree = ttk.Treeview(self, columns=columns, show='headings')
+        self.tree = ttk.Treeview(self, columns=(*columns, "hidden_id"), show='headings')
+
+        # Hide the ID column
+        self.tree.column("hidden_id", width=0, stretch=False)
+        self.tree.heading("hidden_id", text="")
 
         # Define headings with adjusted styles
         for col in columns:
@@ -168,6 +172,10 @@ class ExpenseFrame(BaseFrame):
             CTkMessagebox(title="Error", message="Please input only digits on expense amount.")
             return
 
+        if not expense_amount or not expense_date:
+            CTkMessagebox(title="Error", message="Expense date and amount required.")
+            return
+
         # proceed to save data to the database
         conn = draft_backend.get_db_connection()
         if not conn:
@@ -198,7 +206,7 @@ class ExpenseFrame(BaseFrame):
 
             # Insert data into the treeview
             for row in expenses:
-                self.tree.insert("", 'end', values=row)
+                self.tree.insert("", 'end', values=(row[1], row[2], row[3], row[4], row[0]))
 
     def start_refresh(self):
         # Periodically refresh data
@@ -220,14 +228,15 @@ class ExpenseFrame(BaseFrame):
             # Iterate over fetched expenses and update or insert into Treeview
             for expense in expenses:
                 # Extract relevant values
-                expense_date = expense[0]
-                expense_amount = expense[1]
-                expense_type = expense[2]
-                description = expense[3]
+                expense_date = expense[1]
+                expense_amount = expense[2]
+                expense_type = expense[3]
+                description = expense[4]
+                expense_id = expense[0]
 
                 # Insert or update Treeview item
                 self.tree.insert("", "end", values=(expense_date, expense_amount, expense_type,
-                                                    description))
+                                                    description, expense_id))
 
         except Exception as e:
             print(f"Error fetching data: {str(e)}")
@@ -240,12 +249,33 @@ class ExpenseFrame(BaseFrame):
         print(f"Selected item: {selected_item}")
 
     def delete_selected(self):
-        selected_item = self.tree.selection()[0]  # Get selected item ID
+        selected_item = self.tree.selection()  # Get selected item(s)
         if selected_item:
-            self.tree.delete(selected_item)
-            print(f"Deleted item: {selected_item}")
+            response = CTkMessagebox(title="Delete Confirmation",
+                                     message="Are you sure you want to delete the selected expense?",
+                                     icon="warning",
+                                     option_1="Yes",
+                                     option_2="No").get()
+
+            if response == "Yes":
+                for item in selected_item:
+                    # Get the expense_id from the hidden column
+                    expense_id = self.tree.item(item, 'values')[4]
+
+                    # Delete from Treeview
+                    self.tree.delete(item)
+
+                    # Delete from Database
+                    conn = draft_backend.get_db_connection()
+                    if conn:
+                        try:
+                            draft_backend.delete_expense(conn, expense_id)
+                        except Exception as e:
+                            CTkMessagebox(title="Error", message=f"Error deleting from database: {str(e)}")
+                        finally:
+                            conn.close()
         else:
-            print("No item selected.")
+            CTkMessagebox(title="Error", message="No item selected.")
 
     def perform_search(self):
         # Placeholder for search functionality

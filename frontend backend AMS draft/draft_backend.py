@@ -139,7 +139,7 @@ def create_tables(conn):
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS Report (
     report_id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    admin_id,
+    admin_id INTEGER,
     start_date     DATE,
     end_date       DATE,
     report_comment TEXT,
@@ -150,6 +150,7 @@ def create_tables(conn):
 );
     ''')
 
+    conn.commit()
 
 # ============================================================
 
@@ -265,7 +266,8 @@ def fetch_new_building_info(conn, building_id):
 # for testing only
 def fetch_building_treeview(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT building_id, building_name, country, amenities FROM Apartment_Building;')
+    cursor.execute('''SELECT building_id, building_name, country, amenities FROM Apartment_Building
+                        WHERE is_deleted = 0;''')
     return cursor.fetchall()
 
 
@@ -679,7 +681,10 @@ def fetch_tenant_by_id(conn, tenant_id):
 def fetch_expense_treeview(conn):
     try:
         cursor = conn.cursor()
-        cursor.execute('''SELECT expense_date, expense_amount,
+        cursor.execute('''SELECT 
+        expense_id,
+        expense_date, 
+        expense_amount,
 CASE 
 WHEN expense_type = 1 THEN 'Utilities'
 WHEN expense_type = 2 THEN 'Maintenance and Repairs'
@@ -687,15 +692,26 @@ WHEN expense_type = 3 THEN 'Advertising'
 WHEN expense_type = 4 THEN 'Insurance'
 WHEN expense_type = 5 THEN  'Administrative Costs'
 WHEN expense_type = 6 THEN 'Property Management Costs'
-END,
+END expense_type,
 description
-FROM Expenses;''')
+FROM Expenses
+WHERE is_deleted = 0
+ORDER BY expense_id DESC;''')
         rows = cursor.fetchall()
         return rows
 
     except Exception as e:
         print({e})
         return []
+
+
+def delete_expense(conn, expense_id):
+    cursor = conn.cursor()
+    cursor.execute('''UPDATE expenses
+SET
+is_deleted = 1
+WHERE expense_id = ?;''', (expense_id,))
+    conn.commit()
 
 
 # ================ dashboard PAGE FUNCTIONS =======================
@@ -1038,3 +1054,4 @@ ORDER BY
 ''', (search_term,))
     unit_info = cursor.fetchall()
     return unit_info
+
