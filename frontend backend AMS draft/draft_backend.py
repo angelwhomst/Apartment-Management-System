@@ -813,22 +813,27 @@ def minimum_rental_rate(conn):
 # ================ See More monthly_earnings FUNCTIONS =======================
 def rent_collection(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT SUM(amount) FROM Payment;')
+    cursor.execute('''SELECT SUM(amount) FROM Payment WHERE payment_date >= DATE('now', '-30 days')
+                        AND is_deleted = 0;''')
     return cursor.fetchone()[0]
 
 
 def monthly_expense(conn):
     cursor = conn.cursor()
-    cursor.execute('SELECT SUM(expense_amount) FROM Expenses WHERE is_deleted = 0;')
+    cursor.execute('''SELECT SUM(expense_amount) FROM Expenses WHERE expense_date >= DATE('now', '-30 days')
+                   AND is_deleted = 0;''')
     return cursor.fetchone()[0]
 
 
 def monthly_earnings(conn):
     cursor = conn.cursor()
-    cursor.execute('''SELECT (SELECT (SELECT COALESCE(SUM(amount), 0)FROM Payment) - COALESCE(SUM(expense_amount), 0) 
-                        FROM Expenses WHERE is_deleted = 0)  AS earnings;
-                        -- COALESCE. if there are no records to sum (resulting in NULL), it defaults to 0 
-''')
+    cursor.execute('''SELECT (SELECT COALESCE(SUM(amount), 0) 
+                            FROM Payment 
+                            WHERE payment_date >= DATE('now', '-30 days')) 
+                            - COALESCE(SUM(expense_amount), 0) 
+                            FROM Expenses 
+                            WHERE expense_date >= DATE('now', '-30 days') 
+                            AND is_deleted = 0;''')
     return cursor.fetchone()[0]
 
 

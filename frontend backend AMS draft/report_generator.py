@@ -69,6 +69,118 @@ async def create_pdf_report(tenant_data, output_filename):
         # Keep the script running indefinitely
         await asyncio.Future()
 
+
+
+# html_content = """
+# <!DOCTYPE html>
+# <html lang="en">
+# <head>
+#     <meta charset="UTF-8">
+#     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+#     <title>Apartment Management System Report</title>
+#     <style>
+#         body {
+#             font-family: Arial, sans-serif;
+#             margin: 1cm;
+#         }
+#         h1 {
+#             text-align: center;
+#         }
+#         p {
+#             text-align: center;
+#         }
+#         table {
+#             width: 100%;
+#             border-collapse: collapse;
+#             margin-top: 20px;
+#             page-break-inside: auto;
+#         }
+#         th, td {
+#             border: 1px solid #ddd;
+#             padding: 8px;
+#             text-align: left;
+#             page-break-inside: avoid;
+#             page-break-after: auto;
+#         }
+#         th {
+#             background-color: #f2f2f2;
+#         }
+#         .page {
+#             page-break-after: always;
+#         }
+#         .last-page {
+#             page-break-after: auto;
+#         }
+#     </style>
+# </head>
+# <body>
+#     <!-- Title Page -->
+#     <div class="page">
+#         <h1>Apartment Management System Report</h1>
+#         <p>{report_date}</p>
+#     </div>
+#
+#     <!-- Financial Summary Report -->
+#     <div class="page">
+#         <h1>Financial Summary Report</h1>
+#         <table>
+#             <thead>
+#                 <tr>
+#                     <th>Rent Collection</th>
+#                     <th>Expenses</th>
+#                 </tr>
+#             </thead>
+#             <tbody>
+#                 {financial_table_rows}
+#             </tbody>
+#         </table>
+#         <p>Total Revenue: {total_revenue}</p>
+#         <p>Total Expenses: {total_expenses}</p>
+#         <p>Net Income: {net_income}</p>
+#     </div>
+#
+#     <!-- Occupancy Rate Report -->
+#     <div class="page">
+#         <h1>Occupancy Rate Report</h1>
+#         <table>
+#             <thead>
+#                 <tr>
+#                     <th>Building Name</th>
+#                     <th>Unit Number</th>
+#                     <th>Rental Rates</th>
+#                 </tr>
+#             </thead>
+#             <tbody>
+#                 {occupancy_table_rows}
+#             </tbody>
+#         </table>
+#         <p>Occupancy Rate: {occupancy_rate}</p>
+#         <p>Average Rental Rate: {average_rental_rate}</p>
+#     </div>
+#
+#     <!-- Tenant Demographic Report -->
+#     <div class="last-page">
+#         <h1>Tenant Demographic Report</h1>
+#         <table>
+#             <thead>
+#                 <tr>
+#                     <th>Tenant Name</th>
+#                     <th>Age</th>
+#                     <th>Gender</th>
+#                     <th>Income</th>
+#                 </tr>
+#             </thead>
+#             <tbody>
+#                 {tenant_demographic_table_rows}
+#             </tbody>
+#         </table>
+#         <p>Age Distribution: {age_distribution}</p>
+#         <p>Gender Distribution: {gender_distribution}</p>
+#         <p>Income Range: {income_range}</p>
+#     </div>
+# </body>
+# </html>
+# """
 # async def create_pdf_report(conn, start_date, end_date, output_filename):
 #     financial_summary = generate_financial_summary(conn, start_date, end_date)
 #     occupancy_rate = generate_occupancy_rate(conn)
