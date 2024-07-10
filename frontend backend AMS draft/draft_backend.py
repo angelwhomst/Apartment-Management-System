@@ -950,3 +950,22 @@ def fetch_unit_id_by_number_and_building(conn, unit_number, building_name):
     except Exception as e:
         print(f"Error fetching unit ID: {str(e)}")
         return None
+
+
+# ================ building_information PAGE FUNCTIONS =======================
+def fetch_building_information_treeview(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT building_id, building_name, country, province, city, street, lot_number, zip_code, amenities 
+                      FROM Apartment_Building
+                      WHERE is_deleted = 0;''')
+    building_info = cursor.fetchall()
+    return building_info
+
+
+def search_building_name(conn, search_name):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT building_id, building_name, country, province, city, street, lot_number, zip_code, 
+    amenities FROM Apartment_Building
+    WHERE building_name like '%'||?||'%';
+    ''', search_name)
+    return cursor.fetchall()
