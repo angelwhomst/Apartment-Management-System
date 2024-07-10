@@ -73,9 +73,9 @@ class PaymentManagementFrame(BaseFrame):
         building_names = draft_backend.fetch_building_names(conn)
         conn.close()
 
-        self.combo_box_building_name = CTkComboBox(self, values=building_names, width=240, height=25,
+        self.combo_box_building_name = CTkComboBox(self, values=building_names, width=200, height=30,
                                                    font=('Century Gothic', 12))
-        self.combo_box_building_name.place(relx=0.490, rely=0.625, anchor="center")
+        self.combo_box_building_name.place(relx=0.490, rely=0.545, anchor="center")
 
         self.combo_box_unit_number = ctk.CTkComboBox(self, values=[], width=200, height=30,
                                                      font=('Century Gothic', 15), border_color="#937A69")
