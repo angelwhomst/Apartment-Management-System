@@ -1132,3 +1132,92 @@ def fetch_transaction_history(conn):
                 AND P.is_deleted = 0
                 ORDER BY P.payment_id DESC;''')
     return cursor.fetchall()
+
+
+# ================ edit_tenant_info PAGE FUNCTIONS =======================
+
+def edit_tenant_info(conn, tenant_id, unit_id, last_name, first_name, middle_name, suffix, email,
+                     contact_number, move_in_date, lease_start_date, lease_end_date, emergency_contact_name,
+                     emergency_contact_number, emergency_contact_relationship, tenant_dob, sex, income):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE Tenant
+            SET
+                unit_id = ?,
+                lastName = ?,
+                firstName = ?,
+                middleName = ?,
+                suffix = ?,
+                email = ?,
+                contact_number = ?,
+                move_in_date = ?,
+                lease_start_date = ?,
+                lease_end_date = ?,
+                Emergency_contact_name = ?,
+                Emergency_contact_number = ?,
+                Emergency_contact_relationship = ?,
+                tenant_dob = ?,
+                sex = ?,
+                income = ?
+            WHERE tenant_id = ?;
+        ''', (unit_id, last_name, first_name, middle_name, suffix, email, contact_number, move_in_date,
+              lease_start_date, lease_end_date, emergency_contact_name, emergency_contact_number,
+              emergency_contact_relationship, tenant_dob, sex, income, tenant_id))
+        conn.commit()
+    except Exception as e:
+        print(str(e))
+
+def get_building_name_by_unit_id(conn, unit_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT b.building_name
+            FROM Apartment_Building b
+            JOIN Apartment_Unit u ON b.building_id = u.building_id
+            WHERE u.unit_id = ?;
+        ''', (unit_id,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        print(str(e))
+        return None
+
+
+def get_unit_number_by_unit_id(conn, unit_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT unit_number
+            FROM Apartment_Unit
+            WHERE unit_id = ?;
+        ''', (unit_id,))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        print(str(e))
+        return None
+
+def fetch_edit_tenant_info(conn, tenant_id):
+    try:
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT T.firstName, T.middleName, T.lastName, T.suffix, T.email, T.contact_number,
+                   T.tenant_dob, T.move_in_date, T.lease_start_date, T.lease_end_date,
+                   T.Emergency_contact_name, T.Emergency_contact_number, T.Emergency_contact_relationship,
+                   T.income, T.unit_id, T.sex
+            FROM Tenant T
+            WHERE T.tenant_id = ?;
+        ''', (tenant_id,))
+        result = cursor.fetchone()
+        if result:
+            print(f"Fetched tenant info for tenant_id {tenant_id}: {result}")
+        else:
+            print(f"No tenant info found for tenant_id {tenant_id}")
+        return result
+    except Exception as e:
+        print(f"Error fetching tenant info for tenant_id {tenant_id}: {str(e)}")
+        return None
+
+
+

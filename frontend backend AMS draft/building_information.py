@@ -137,13 +137,6 @@ class BuildingInformationFrame(BaseFrame):
         if conn:
             building_info = draft_backend.fetch_building_information_treeview(conn)
             conn.close()
-            if building_info is not None:  # Check if building_info is not None
-                for row in building_info:
-                    # Insert the row with the hidden ID column
-                    self.tree.insert("", "end", values=(row[1], row[2], row[3], row[4], row[5], row[6], row[7],
-                                                        row[8], row[0]))
-            else:
-                print("Error: No building information fetched.")
         else:
             print("Error: Failed to connect to the database.")
 
@@ -167,13 +160,6 @@ class BuildingInformationFrame(BaseFrame):
 
             # Iterate over fetched buildings and update or insert into Treeview
             for building in buildings:
-                # Debug print to check data
-                print(f"Fetched building data: {building} with length {len(building)}")
-
-                if len(building) != 9:
-                    print(f"Error: Expected 9 elements, got {len(building)}")
-                    continue  # Skip this row if it doesn't have the expected number of elements
-
                 building_id = building[0]
                 building_name = self.replace_none(building[1])
                 country = self.replace_none(building[2])

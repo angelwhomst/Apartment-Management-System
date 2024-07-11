@@ -31,31 +31,31 @@ class AddTenantComponent:
 
         # Entry fields/Combo box
         self.entry_first_name = CTkEntry(parent, placeholder_text="First name", width=80, height=25,
-                                         border_color="#937A69",
+                                         border_color="#937A69", bg_color="White",
                                          font=('Century Gothic', 12))
         self.entry_first_name.place(relx=0.090, rely=0.368, anchor="center")
 
         self.entry_middle_name = CTkEntry(parent, placeholder_text="Middle name", width=80, height=25,
-                                          border_color="#937A69",
+                                          border_color="#937A69",bg_color="White",
                                           font=('Century Gothic', 12))
         self.entry_middle_name.place(relx=0.194, rely=0.368, anchor="center")
 
         self.entry_last_name = CTkEntry(parent, placeholder_text="Last name", width=80, height=25,
-                                        border_color="#937A69",
+                                        border_color="#937A69",bg_color="White",
                                         font=('Century Gothic', 12))
         self.entry_last_name.place(relx=0.296, rely=0.368, anchor="center")
 
-        self.entry_suffix_name = CTkEntry(parent, placeholder_text="Suffix", width=80, height=25,
+        self.entry_suffix_name = CTkEntry(parent, placeholder_text="Suffix", width=80, height=25,bg_color="White",border_color="#937A69",
                                           font=('Century Gothic', 12))
         self.entry_suffix_name.place(relx=0.400, rely=0.368, anchor="center")
 
         self.entry_contactnum = CTkEntry(parent, placeholder_text="Enter contact number", width=240, height=25,
-                                         border_color="#937A69",
+                                         border_color="#937A69",bg_color="White",
                                          font=('Century Gothic', 12))
         self.entry_contactnum.place(relx=0.310, rely=0.425, anchor="center")
 
         self.entry_email = CTkEntry(parent, placeholder_text="Enter email", width=240, height=25,
-                                    border_color="#937A69",
+                                    border_color="#937A69",bg_color="White",
                                     font=('Century Gothic', 12))
         self.entry_email.place(relx=0.310, rely=0.482, anchor="center")
 
@@ -67,22 +67,19 @@ class AddTenantComponent:
         building_names = draft_backend.fetch_building_names(conn)
         conn.close()
 
-        self.entry_building_name = CTkComboBox(parent, values=building_names, width=240, height=25,
-                                               font=('Century Gothic', 12))
-        self.entry_building_name.place(relx=0.310, rely=0.300, anchor="center")
-
-        # # Bind event to update unit numbers when building is selected HINDI GUMAGANA SA CTK
-        # self.entry_building_name.bind("<<ComboboxSelected>>", self.update_unit_numbers)
+        self.entry_building_name = CTkComboBox(parent, values=building_names, width=160, height=25,
+                                               font=('Century Gothic', 12), border_color="#937A69",bg_color="White",)
+        self.entry_building_name.place(relx=0.840, rely=0.482, anchor="center")
 
         # Fetch unit numbers from the database when building is selected
-        self.entry_unit_number = CTkComboBox(parent, values=[], width=240, height=25,
+        self.entry_unit_number = CTkComboBox(parent, values=[], width=240, height=25, border_color="#937A69",bg_color="White",
                                              font=('Century Gothic', 12))
         self.entry_unit_number.place(relx=0.310, rely=0.539, anchor="center")
 
         # Bind the command to update unit numbers based on building selection
         self.entry_building_name.configure(command=self.update_unit_numbers)
 
-        self.combo_box_sex = CTkComboBox(parent, values=['Male', 'Female', 'Prefer not to say'], width=240, height=25,
+        self.combo_box_sex = CTkComboBox(parent, values=['Male', 'Female', 'Prefer not to say'], width=240, height=25,bg_color="White",
                                          border_color="#937A69",
                                          font=('Century Gothic', 12))
         self.combo_box_sex.place(relx=0.310, rely=0.596, anchor="center")
@@ -92,7 +89,7 @@ class AddTenantComponent:
         self.entry_birthdate.place(relx=0.310, rely=0.653, anchor="center")
 
         self.entry_income = CTkEntry(parent, placeholder_text="Enter income",
-                                     width=240, height=25, border_color="#937A69", font=('Century Gothic', 12))
+                                     width=240, height=25, border_color="#937A69", font=('Century Gothic', 12),bg_color="White",)
         self.entry_income.place(relx=0.310, rely=0.710, anchor="center")
 
         self.entry_move_in = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2,
@@ -111,16 +108,16 @@ class AddTenantComponent:
         self.entry_lease_end.place(relx=0.840, rely=0.425, anchor="center")
 
         self.entry_emergency_contact_number = CTkEntry(parent, placeholder_text="Enter emergency contact number",
-                                                       width=250, height=25, border_color="#937A69",
+                                                       width=250, height=25, border_color="#937A69",bg_color="White",
                                                        font=('Century Gothic', 12))
         self.entry_emergency_contact_number.place(relx=0.420, rely=0.7955, anchor="center")
 
-        self.entry_emergency_contact_name = CTkEntry(parent, placeholder_text="Enter emergency contact name",
+        self.entry_emergency_contact_name = CTkEntry(parent, placeholder_text="Enter emergency contact name",bg_color="White",
                                                      width=250, height=25, border_color="#937A69",
                                                      font=('Century Gothic', 12))
         self.entry_emergency_contact_name.place(relx=0.420, rely=0.8525, anchor="center")
 
-        self.entry_relationship = CTkEntry(parent, placeholder_text="Enter relationship",
+        self.entry_relationship = CTkEntry(parent, placeholder_text="Enter relationship",bg_color="White",
                                            width=250, height=25, border_color="#937A69",
                                            font=('Century Gothic', 12))
         self.entry_relationship.place(relx=0.420, rely=0.9095, anchor="center")

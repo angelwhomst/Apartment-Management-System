@@ -1,4 +1,5 @@
-import tkinter as tk
+from tkinter import *
+from tkinter import ttk
 from CTkMessagebox import CTkMessagebox
 from tkcalendar import DateEntry
 import customtkinter as ctk
@@ -13,13 +14,15 @@ sex_mapping = {
 }
 
 
-class EditTenantComponent:
+class EditTenantInformation:
     def __init__(self, parent, tenant_id=None):
         self.parent = parent
+        self.tenant_id = tenant_id
         self.display_tenant_id = None
-        self.add_building_window = None  # Initialize top-level window attribute for Edit Building
-        self.add_unit_window = None  # Initialize top-level window attribute for Edit Unit
+        self.add_building_window = None  # Initialize top-level window attribute for Add Building
+        self.add_unit_window = None  # Initialize top-level window attribute for Add Unit
         self.create_widgets(parent)
+        self.populate_tenant_info()
 
     def create_widgets(self, parent):
         # Add background image
@@ -28,80 +31,115 @@ class EditTenantComponent:
         building_bg_lbl = ctk.CTkLabel(parent, text="", image=building_bg)
         building_bg_lbl.place(x=0, y=0)
 
+        # StringVars for entry fields
+        self.tenant_firt_name_var = StringVar()
+        self.tenant_middle_name_var = StringVar()
+        self.tenant_last_name_var = StringVar()
+        self.suffix_var = StringVar()
+        self.contactnum_var = StringVar()
+        self.email_var = StringVar()
+        self.unit_number_var = StringVar()
+        self.sex_var = StringVar()
+        self.birthdate_var = StringVar()
+        self.move_in_var = StringVar()
+        self.lease_start_var = StringVar()
+        self.lease_end_var = StringVar()
+        self.last_payment_var = StringVar()
+        self.emergency_contact_number_var = StringVar()
+        self.emergency_contact_name_var = StringVar()
+        self.relationship_var = StringVar()
+        self.income_var = StringVar()
+
         # Entry fields/Combo box
-        self.entry_first_name = CTkEntry(parent, placeholder_text="First name", width=80, height=25, border_color="#937A69",
-                                          font=('Century Gothic', 12))
+        self.entry_first_name = CTkEntry(parent, textvariable=self.tenant_firt_name_var, width=80, height=25,
+                                         border_color="#937A69", bg_color="White",
+                                         font=('Century Gothic', 12))
         self.entry_first_name.place(relx=0.090, rely=0.368, anchor="center")
 
-        self.entry_middle_name = CTkEntry(parent, placeholder_text="Middle name", width=80, height=25,
-                                         border_color="#937A69",
-                                         font=('Century Gothic', 12))
+        self.entry_middle_name = CTkEntry(parent, textvariable=self.tenant_middle_name_var, width=80, height=25,
+                                          border_color="#937A69",bg_color="White",
+                                          font=('Century Gothic', 12))
         self.entry_middle_name.place(relx=0.194, rely=0.368, anchor="center")
 
-        self.entry_last_name = CTkEntry(parent, placeholder_text="Last name", width=80, height=25,
-                                          border_color="#937A69",
-                                          font=('Century Gothic', 12))
+        self.entry_last_name = CTkEntry(parent, textvariable=self.tenant_last_name_var, width=80, height=25,
+                                        border_color="#937A69",bg_color="White",
+                                        font=('Century Gothic', 12))
         self.entry_last_name.place(relx=0.296, rely=0.368, anchor="center")
 
-        self.entry_suffix_name = CTkEntry(parent, placeholder_text="Suffix", width=80, height=25,
+        self.entry_suffix_name = CTkEntry(parent, textvariable=self.suffix_var, width=80, height=25,bg_color="White",border_color="#937A69",
                                           font=('Century Gothic', 12))
         self.entry_suffix_name.place(relx=0.400, rely=0.368, anchor="center")
 
-        self.entry_contactnum = CTkEntry(parent, placeholder_text="Enter contact number", width=240, height=25, border_color="#937A69",
+        self.entry_contactnum = CTkEntry(parent, textvariable=self.contactnum_var, width=240, height=25,
+                                         border_color="#937A69",bg_color="White",
                                          font=('Century Gothic', 12))
         self.entry_contactnum.place(relx=0.310, rely=0.425, anchor="center")
 
-        self.entry_email = CTkEntry(parent, placeholder_text="Enter email", width=240, height=25, border_color="#937A69",
+        self.entry_email = CTkEntry(parent, textvariable=self.email_var, width=240, height=25,
+                                    border_color="#937A69",bg_color="White",
                                     font=('Century Gothic', 12))
         self.entry_email.place(relx=0.310, rely=0.482, anchor="center")
 
-        # Fetch unit numbers from the database
+        # Fetch building names from the database
         conn = draft_backend.get_db_connection()
         if not conn:
             CTkMessagebox(title="Error", message="Error connecting to database.")
             return
-        unit_numbers = draft_backend.fetch_unit_numbers(conn)
+        building_names = draft_backend.fetch_building_names(conn)
         conn.close()
 
-        self.entry_unit_number = CTkComboBox(parent, values=unit_numbers, width=240, height=25, border_color="#937A69",
-                                          font=('Century Gothic', 12))
+        self.entry_building_name = CTkComboBox(parent, values=building_names, width=160, height=25,
+                                               font=('Century Gothic', 12), border_color="#937A69",bg_color="White",)
+        self.entry_building_name.place(relx=0.840, rely=0.482, anchor="center")
+
+        # Fetch unit numbers from the database when building is selected
+        self.entry_unit_number = CTkComboBox(parent, values=[], width=240, height=25, border_color="#937A69",bg_color="White",
+                                             font=('Century Gothic', 12))
         self.entry_unit_number.place(relx=0.310, rely=0.539, anchor="center")
 
-        self.combo_box_sex = CTkComboBox(parent, values=['Male', 'Female', 'Prefer not to say'], width=240, height=25,
+        # Bind the command to update unit numbers based on building selection
+        self.entry_building_name.configure(command=self.update_unit_numbers)
+
+        self.combo_box_sex = CTkComboBox(parent, values=['Male', 'Female', 'Prefer not to say'], width=240, height=25,bg_color="White",
                                          border_color="#937A69",
                                          font=('Century Gothic', 12))
         self.combo_box_sex.place(relx=0.310, rely=0.596, anchor="center")
 
-        self.entry_birthdate = DateEntry(parent, width=30, background='#937A69', foreground='white', borderwidth=2,
+        self.entry_birthdate = DateEntry(parent, textvariable=self.birthdate_var, width=30, background='#937A69', foreground='white', borderwidth=2,
                                          font=('Century Gothic', 12))
         self.entry_birthdate.place(relx=0.310, rely=0.653, anchor="center")
 
-        self.entry_income = CTkEntry(parent,  placeholder_text="Enter income",
-                                     width=240, height=25, border_color="#937A69", font=('Century Gothic', 12))
+        self.entry_income = CTkEntry(parent, textvariable=self.income_var,
+                                     width=240, height=25, border_color="#937A69", font=('Century Gothic', 12),bg_color="White",)
         self.entry_income.place(relx=0.310, rely=0.710, anchor="center")
 
-        self.entry_move_in = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2,selectbackground='#937A69',
+        self.entry_move_in = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2,
+                                       selectbackground='#937A69',
                                        font=('Century Gothic', 12))
         self.entry_move_in.place(relx=0.840, rely=0.311, anchor="center")
 
-        self.entry_lease_start = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2,selectbackground='#937A69',
+        self.entry_lease_start = DateEntry(parent, textvariable=self.lease_start_var, width=20, background='#937A69', foreground='#937A69', borderwidth=2,
+                                           selectbackground='#937A69',
                                            font=('Century Gothic', 12))
         self.entry_lease_start.place(relx=0.840, rely=0.368, anchor="center")
 
-        self.entry_lease_end = DateEntry(parent, width=20, background='#937A69', foreground='#937A69', borderwidth=2, selectbackground='#937A69',
+        self.entry_lease_end = DateEntry(parent, textvariable=self.lease_end_var, width=20, background='#937A69', foreground='#937A69', borderwidth=2,
+                                         selectbackground='#937A69',
                                          font=('Century Gothic', 12))
         self.entry_lease_end.place(relx=0.840, rely=0.425, anchor="center")
 
-        self.entry_emergency_contact_number = CTkEntry(parent, placeholder_text="Enter emergency contact number", width=250, height=25, border_color="#937A69",
+        self.entry_emergency_contact_number = CTkEntry(parent, textvariable=self.emergency_contact_number_var,
+                                                       width=250, height=25, border_color="#937A69",bg_color="White",
                                                        font=('Century Gothic', 12))
         self.entry_emergency_contact_number.place(relx=0.420, rely=0.7955, anchor="center")
 
-        self.entry_emergency_contact_name = CTkEntry(parent, placeholder_text="Enter emergency contact name",
+        self.entry_emergency_contact_name = CTkEntry(parent, textvariable=self.emergency_contact_name_var,
+                                                     bg_color="White",
                                                      width=250, height=25, border_color="#937A69",
                                                      font=('Century Gothic', 12))
         self.entry_emergency_contact_name.place(relx=0.420, rely=0.8525, anchor="center")
 
-        self.entry_relationship = CTkEntry(parent, placeholder_text="Enter relationship",
+        self.entry_relationship = CTkEntry(parent, textvariable=self.relationship_var, bg_color="White",
                                            width=250, height=25, border_color="#937A69",
                                            font=('Century Gothic', 12))
         self.entry_relationship.place(relx=0.420, rely=0.9095, anchor="center")
@@ -115,10 +153,24 @@ class EditTenantComponent:
             "font": ('Century Gothic', 20, "bold")
         }
 
-        save_button = ctk.CTkButton(parent, text="Edit", command=self.save_tenant_info, **button_style)
+        save_button = ctk.CTkButton(parent, text="Save", command=self.save_tenant_info, **button_style)
 
         # Place the buttons
         save_button.place(relx=0.85, rely=0.90, anchor='center')
+
+    def update_unit_numbers(self, selected_building):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        unit_numbers = draft_backend.fetch_unit_numbers_by_building(conn, selected_building)
+        conn.close()
+
+        print(f"Fetched unit numbers: {unit_numbers}")  # Debug statement
+
+        # Clear existing values and update with fetched unit numbers
+        self.entry_unit_number.configure(values=unit_numbers)
 
     def save_tenant_info(self):
         # Collect data from the entry fields/user input
@@ -128,7 +180,6 @@ class EditTenantComponent:
         suffix = self.entry_suffix_name.get()
         contact_number = self.entry_contactnum.get()
         email = self.entry_email.get()
-        unit_number = self.entry_unit_number.get()
         sex = self.combo_box_sex.get()
         birthdate = self.entry_birthdate.get_date()
         move_in_date = self.entry_move_in.get_date()
@@ -137,13 +188,20 @@ class EditTenantComponent:
         emergency_contact_number = self.entry_emergency_contact_number.get()
         emergency_contact_name = self.entry_emergency_contact_name.get()
         emergency_contact_relationship = self.entry_relationship.get()
+        income = self.entry_income.get()
+        building_name = self.entry_building_name.get()
+        unit_number = self.entry_unit_number.get()
 
         # Map the selected sex to its integer value
         sex_int = sex_mapping.get(sex)
 
         # Validate required fields
-        if not unit_number or not last_name or not first_name:
+        if not building_name or not unit_number or not last_name or not first_name:
             CTkMessagebox(title="Error", message="All fields are required.")
+            return
+
+        if not income.isdigit():
+            CTkMessagebox(title="Error", message="Please input only digits on tenant income.")
             return
 
         # Proceed to save data to the database
@@ -153,57 +211,69 @@ class EditTenantComponent:
             return
 
         try:
-            # Update tenant information based on tenant_id
-            draft_backend.update_tenant(
-                conn, self.display_tenant_id, last_name, first_name, middle_name, suffix, email, contact_number,
+            # Fetch the building_id based on building_name
+            building_id = draft_backend.get_building_id(conn, building_name)
+            if not building_id:
+                CTkMessagebox(title="Error", message="Invalid building selected.")
+                return
+
+            # Fetch the unit_id based on unit_number and building_id
+            unit_id = draft_backend.get_unit_id(conn, unit_number, building_id)
+            if not unit_id:
+                CTkMessagebox(title="Error", message="Invalid unit number selected.")
+                return
+
+            # Insert tenant information and fetch the tenant_id
+            self.display_tenant_id = draft_backend.edit_tenant_info(
+                conn, unit_id, last_name, first_name, middle_name, suffix, email, contact_number,
                 move_in_date, lease_start_date, lease_end_date,
                 emergency_contact_name, emergency_contact_number, emergency_contact_relationship,
-                birthdate, sex_int
-            )
-
+                birthdate, sex_int, income, self.tenant_id)
             CTkMessagebox(title="Success", message="Tenant information updated successfully!")
-
-            # Close the current Edit Tenant window
-            self.parent.destroy()
-
-            # Create a new CTkToplevel window for displaying tenant information
-            self.display_tenant_info_window = ctk.CTkToplevel()
-            self.display_tenant_info_window.title("Display Tenant Information")
-            self.display_tenant_info_window.geometry("900x600")
-
-            # Ensure the new window is always on top
-            self.display_tenant_info_window.attributes('-topmost', True)
-            self.display_tenant_info_window.resizable(False, False)
-
-            # Center the new window on the screen
-            screen_width = self.display_tenant_info_window.winfo_screenwidth()
-            screen_height = self.display_tenant_info_window.winfo_screenheight()
-            window_width = 900
-            window_height = 600
-
-            position_right = int(screen_width / 2 - window_width / 2)
-            position_down = int(screen_height / 2 - window_height / 2)
-
-            self.display_tenant_info_window.geometry(
-                f"{window_width}x{window_height}+{position_right}+{position_down}")
-
-            # Import DisplayTenantComponent class here to avoid circular import
-            from display_tenant_details import DisplayTenantComponent
-
-            # Create an instance of DisplayTenantComponent and pass the new window as its parent
-            DisplayTenantComponent(self.display_tenant_info_window, self.display_tenant_id)
-
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
-
         finally:
             conn.close()
 
-def main():
-    root = tk.Tk()
-    root.geometry("950x600")
-    app = EditTenantComponent(root)
-    root.mainloop()
+        # Close the Edit Building window after saving
+        self.parent.destroy()
 
-if __name__ == "__main__":
-    main()
+    def populate_tenant_info(self):
+        conn = draft_backend.get_db_connection()
+        if not conn:
+            CTkMessagebox(title="Error", message="Error connecting to database.")
+            return
+
+        try:
+            print(f"Populating info for tenant_id: {self.tenant_id}")
+            tenant_info = draft_backend.fetch_edit_tenant_info(conn, self.tenant_id)
+            if tenant_info:
+                print(f"Fetched tenant info: {tenant_info}")
+                self.tenant_firt_name_var.set(tenant_info[0])
+                self.tenant_middle_name_var.set(tenant_info[1])
+                self.tenant_last_name_var.set(tenant_info[2])
+                self.suffix_var.set(tenant_info[3])
+                self.email_var.set(tenant_info[4])
+                self.contactnum_var.set(tenant_info[5])
+                self.birthdate_var.set(tenant_info[6])
+                self.move_in_var.set(tenant_info[7])
+                self.lease_start_var.set(tenant_info[8])
+                self.lease_end_var.set(tenant_info[9])
+                self.emergency_contact_name_var.set(tenant_info[10])
+                self.emergency_contact_number_var.set(tenant_info[11])
+                self.relationship_var.set(tenant_info[12])
+                self.income_var.set(tenant_info[13])
+
+                # Fetch building name and unit number for the tenant
+                building_name = draft_backend.get_building_name_by_unit_id(conn, tenant_info[14])
+                unit_number = draft_backend.get_unit_number_by_unit_id(conn, tenant_info[14])
+
+                sex_str = list(sex_mapping.keys())[list(sex_mapping.values()).index(tenant_info[15])]
+                self.combo_box_sex.set(sex_str)
+            else:
+                CTkMessagebox(title="Error", message="Tenant not found.")
+        except Exception as e:
+            CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
+        finally:
+            conn.close()
+

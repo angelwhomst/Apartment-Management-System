@@ -11,7 +11,7 @@ from login import LoginFrame
 from profile import ProfileFrame
 import draft_backend
 from display_tenant_details import DisplayTenantComponent  # Import the DisplayTenantComponent
-from edit_tenant_info import EditTenantComponent
+from edit_tenant_info import EditTenantInformation
 import datetime
 
 
@@ -294,7 +294,7 @@ class TenantInformationFrame(BaseFrame):
         top_level_window.geometry("1120x720")
 
         # Create an instance of EditTenantComponent and pass tenant_id
-        EditTenantComponent(top_level_window, tenant_id)
+        EditTenantInformation(top_level_window, tenant_id)
 
     def delete_selected(self):
         selected_item = self.tree.selection()  # Get selected item(s)
