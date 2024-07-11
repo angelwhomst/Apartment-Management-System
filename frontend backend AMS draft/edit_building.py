@@ -5,6 +5,7 @@ import customtkinter as ctk
 from customtkinter import CTkEntry
 import draft_backend
 
+
 class EditBuildingComponent:
     def __init__(self, parent, building_id=None):
         self.parent = parent
@@ -19,42 +20,53 @@ class EditBuildingComponent:
         building_bg_lbl = ctk.CTkLabel(parent, text="", image=building_bg)
         building_bg_lbl.place(x=0, y=0)
 
+        # StringVars for labels
+        self.label_building_name_var = tk.StringVar()
+        self.label_country_var = tk.StringVar()
+        self.label_province_var = tk.StringVar()
+        self.label_city_var = tk.StringVar()
+        self.label_street_var = tk.StringVar()
+        self.label_lot_var = tk.StringVar()
+        self.label_zipcode_var = tk.StringVar()
+        self.label_amenities_var = tk.StringVar()
+
         # Entry fields
-        self.entry_building_name = CTkEntry(parent, placeholder_text="Enter building name", width=181, height=30,
+        self.entry_building_name = CTkEntry(parent, textvariable=self.label_building_name_var, width=181, height=30,
                                             border_color="#937A69",
                                             font=('Century Gothic', 15))
         self.entry_building_name.place(relx=0.336, rely=0.535, anchor="center")
 
-        self.entry_country = CTkEntry(parent, placeholder_text="Enter country", width=240, height=30,
+        self.entry_country = CTkEntry(parent, textvariable=self.label_country_var, width=240, height=30,
                                       border_color="#937A69",
                                       font=('Century Gothic', 15))
         self.entry_country.place(relx=0.305, rely=0.605, anchor="center")
 
-        self.entry_province = CTkEntry(parent, placeholder_text="Enter province", width=240, height=30,
+        self.entry_province = CTkEntry(parent, textvariable=self.label_province_var, width=240, height=30,
                                        border_color="#937A69",
                                        font=('Century Gothic', 15))
         self.entry_province.place(relx=0.305, rely=0.675, anchor="center")
 
-        self.entry_city = CTkEntry(parent, placeholder_text="Enter city", width=240, height=30, border_color="#937A69",
+        self.entry_city = CTkEntry(parent, textvariable=self.label_city_var, width=240, height=30,
+                                   border_color="#937A69",
                                    font=('Century Gothic', 15))
         self.entry_city.place(relx=0.305, rely=0.745, anchor="center")
 
-        self.entry_street = CTkEntry(parent, placeholder_text="Enter street", width=240, height=30,
+        self.entry_street = CTkEntry(parent, textvariable=self.label_street_var, width=240, height=30,
                                      border_color="#937A69",
                                      font=('Century Gothic', 15))
         self.entry_street.place(relx=0.795, rely=0.535, anchor="center")
 
-        self.entry_lot = CTkEntry(parent, placeholder_text="Enter lot number", width=240, height=30,
+        self.entry_lot = CTkEntry(parent, textvariable=self.label_lot_var, width=240, height=30,
                                   border_color="#937A69",
                                   font=('Century Gothic', 15))
         self.entry_lot.place(relx=0.795, rely=0.605, anchor="center")
 
-        self.entry_zipcode = CTkEntry(parent, placeholder_text="Enter zip code", width=240, height=30,
+        self.entry_zipcode = CTkEntry(parent, textvariable=self.label_zipcode_var, width=240, height=30,
                                       border_color="#937A69",
                                       font=('Century Gothic', 15))
         self.entry_zipcode.place(relx=0.795, rely=0.675, anchor="center")
 
-        self.entry_amenities = CTkEntry(parent, placeholder_text="Enter amenities", width=240, height=30,
+        self.entry_amenities = CTkEntry(parent, textvariable=self.label_amenities_var, width=240, height=30,
                                         border_color="#937A69",
                                         font=('Century Gothic', 15))
         self.entry_amenities.place(relx=0.795, rely=0.745, anchor="center")
@@ -71,25 +83,22 @@ class EditBuildingComponent:
         save_button.place(relx=0.85, rely=0.90, anchor='center')
 
     def populate_building_info(self):
-        if not self.building_id:
-            return
-
         conn = draft_backend.get_db_connection()
         if not conn:
-            CTkMessagebox(title="Error", message="Error connecting to database.")
             return
 
         try:
-            building_info = draft_backend.fetch_building_info(conn, self.building_id)
+            building_info = draft_backend.fetch_new_building_info(conn, self.building_id)
             if building_info:
-                self.entry_building_name.set(building_info['building_name'])
-                self.entry_country.set(building_info['country'])
-                self.entry_province.set(building_info['province'])
-                self.entry_city.set(building_info['city'])
-                self.entry_street.set(building_info['street'])
-                self.entry_lot.set(building_info['lot_number'])
-                self.entry_zipcode.set(building_info['zip_code'])
-                self.entry_amenities.set(building_info['amenities'])
+                # Populate entry fields with retrieved building information
+                self.label_building_name_var.set(building_info[2])
+                self.label_country_var.set(building_info[3])
+                self.label_province_var.set(building_info[4])
+                self.label_city_var.set(building_info[5])
+                self.label_street_var.set(building_info[6])
+                self.label_lot_var.set(building_info[7])
+                self.label_zipcode_var.set(building_info[8])
+                self.label_amenities_var.set(building_info[9])
             else:
                 CTkMessagebox(title="Error", message=f"Building information not found for ID: {self.building_id}")
         except Exception as e:
@@ -117,8 +126,8 @@ class EditBuildingComponent:
             return
 
         try:
-            draft_backend.update_building(conn, self.building_id, building_name, country, province, city, street,
-                                          lot_number, zip_code, amenities)
+            draft_backend.edit_building(conn, building_name, country, province, city, street,
+                                        lot_number, zip_code, amenities, self.building_id)
             CTkMessagebox(title="Success", message="Building information updated successfully!")
         except Exception as e:
             CTkMessagebox(title="Error", message=f"An error occurred: {str(e)}")
@@ -128,12 +137,14 @@ class EditBuildingComponent:
         # Close the Edit Building window after saving
         self.parent.destroy()
 
+
 # Corrected indentation for main function
 def main():
     root = tk.Tk()
     root.geometry("950x600")
     app = EditBuildingComponent(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()

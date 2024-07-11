@@ -21,9 +21,10 @@ class TenantInformationFrame(BaseFrame):
         self.create_widgets()
         self.populate_treeview()
 
-        # Bind double-click event on Treeview
+        # Bind double-click event on treeview
         self.tree.bind("<Double-1>", self.show_tenant_details)
 
+        # bind double right click event on treeview
         self.tree.bind("<Double-3>", self.show_edit_tenant_info)
 
     def create_widgets(self):

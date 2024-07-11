@@ -8,6 +8,7 @@ from login import LoginFrame
 from profile import ProfileFrame
 import draft_backend
 from display_building_info import DisplayBuildingInformation
+from edit_building import EditBuildingComponent
 
 
 class BuildingInformationFrame(BaseFrame):
@@ -16,6 +17,7 @@ class BuildingInformationFrame(BaseFrame):
         self.create_widgets()
         self.populate_treeview()
 
+        self.tree.bind("<Double-3>", self.show_edit_building_info)
     def create_widgets(self):
         # Add background image
         dashboard_bg_image = Image.open("images/buildinginfobg.jpg")
@@ -286,3 +288,17 @@ class BuildingInformationFrame(BaseFrame):
                             conn.close()
         else:
             CTkMessagebox(title="Error", message="No item selected.")
+
+    def show_edit_building_info(self, event):
+        # Get the selected item from Treeview
+        item = self.tree.selection()[0]
+        # Retrieve the tenant_id (the last column in the Treeview)
+        building_id = self.tree.item(item, "values")[-1]
+
+        # Open a new window to display building information
+        top_level_window = tk.Toplevel(self)
+        top_level_window.title("Edit Building Information")
+        top_level_window.geometry("1120x720")
+
+        # Create an instance of EditTenantComponent and pass tenant_id
+        EditBuildingComponent(top_level_window, building_id)

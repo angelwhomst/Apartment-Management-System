@@ -273,16 +273,15 @@ def fetch_building_treeview(conn):
     return cursor.fetchall()
 
 
-# ================ Edit Building PAGE FUNCTIONS =======================
+# ================ edit_building PAGE FUNCTIONS =======================
 
-def edit_last_inserted_building_id(conn, building_name, country, province, city, street, lot_number,
-                                   zip_code, amenities):
+def edit_building(conn, building_name, country, province, city, street, lot_number,
+                  zip_code, amenities, building_id):
     try:
         cursor = conn.cursor()
         cursor.execute('''
             update Apartment_Building 
         set building_name = ?,
-        building_name =?, 
         country =?,
         province= ?,
         city = ?,
@@ -290,8 +289,8 @@ def edit_last_inserted_building_id(conn, building_name, country, province, city,
         lot_number =?,
          zip_code = ?, 
          amenities = ?
-        where last_insert_rowid();
-            ''', (building_name, country, province, city, street, lot_number, zip_code, amenities))
+        where building_id = ?;
+            ''', (building_name, country, province, city, street, lot_number, zip_code, amenities, building_id))
         conn.commit()
     except Exception as e:
         print(str(e))
