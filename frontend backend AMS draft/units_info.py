@@ -14,6 +14,7 @@ class UnitsInfoFrame(BaseFrame):
         super().__init__(parent, controller)
         self.create_widgets()
         self.populate_treeview()
+        self.start_refresh()
 
     def create_widgets(self):
         # Add background image
