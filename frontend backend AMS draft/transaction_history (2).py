@@ -111,9 +111,3 @@ class TransactionHistory(ctk.CTkFrame):
         return value if value is not None else ""
 
 
-# FOR TESTING Entry point for running the RecentTenantComponent directly
-if __name__ == "__main__":
-    root = ctk.CTk()
-    admin_tool = TransactionHistory(root)
-    admin_tool.pack(fill="both", expand=True)
-    root.mainloop()

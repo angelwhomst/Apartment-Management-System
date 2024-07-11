@@ -66,13 +66,6 @@ class PaymentManagementFrame(BaseFrame):
 
         self.entry_bill.place(relx=0.490, rely=0.545, anchor="center")
 
-        # # Fetch building names from the database
-        # conn = draft_backend.get_db_connection()
-        # if not conn:
-        #     return
-        # building_names = draft_backend.fetch_building_names(conn)
-        # conn.close()
-
         self.combo_box_building_name = CTkComboBox(self, values=[], width=200, height=30,
                                                    font=('Century Gothic', 12))
         self.combo_box_building_name.place(relx=0.490, rely=0.545, anchor="center")

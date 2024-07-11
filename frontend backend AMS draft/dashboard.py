@@ -1,3 +1,4 @@
+from CTkMessagebox import CTkMessagebox
 from PIL import Image
 import customtkinter as ctk
 import draft_backend
@@ -199,8 +200,22 @@ class DashboardFrame(BaseFrame):
         logout_btn = ctk.CTkButton(master=self, text="Log out", corner_radius=0, fg_color="#CFB9A3",
                                    hover_color="#D6BC9D", text_color="#5c483f", bg_color="#5D646E",
                                    font=('Century Gothic', 20, "bold"), width=90, height=30,
-                                   command=self.open_login)
+                                   command=self.confirm_logout)
         logout_btn.place(relx=0.920, rely=0.105)
+
+    def confirm_logout(self):
+        response = CTkMessagebox(title="Logout Confirmation",
+                                 message="Are you sure you want to log out?",
+                                 icon="warning",
+                                 option_1="Yes",
+                                 option_2="No").get()
+
+        if response == "Yes":
+            self.open_login()
+
+    def open_login(self):
+        from login import LoginFrame
+        self.controller.show_frame(LoginFrame)
 
     def open_profile(self):
         from profile import ProfileFrame
