@@ -1107,3 +1107,29 @@ SET
 is_deleted = 1
 WHERE unit_id = ?;''', (unit_id,))
     conn.commit()
+
+
+# ================ transaction_history PAGE FUNCTIONS =======================
+def fetch_transaction_history(conn):
+    cursor = conn.cursor()
+    cursor.execute('''SELECT 
+                    P.payment_id,
+                    T.firstName || ' ' || T.middleName || ' ' || T.lastName || ' ' || T.suffix AS tenant_name,
+                    AB.building_name,
+                    AU.unit_number,
+                    AU.rental_rate,
+                    P.payment_date,
+                    P.payment_method,
+                    P.amount
+                    FROM Tenant AS T
+                INNER JOIN Apartment_Unit AS AU
+                    ON T.unit_id = AU.unit_id
+                INNER JOIN Apartment_Building AS AB
+                    ON AU.building_id = AB.building_id
+                LEFT JOIN Payment AS P
+                    ON T.tenant_id = P.tenant_id
+                WHERE T.is_deleted = 0
+                AND AU.availability_status=2
+                AND P.is_deleted = 0
+                ORDER BY P.payment_id DESC;''')
+    return cursor.fetchall()
