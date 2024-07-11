@@ -11,6 +11,7 @@ from login import LoginFrame
 from profile import ProfileFrame
 import draft_backend
 from display_tenant_details import DisplayTenantComponent  # Import the DisplayTenantComponent
+from edit_tenant_info import EditTenantComponent
 import datetime
 
 
@@ -22,6 +23,8 @@ class TenantInformationFrame(BaseFrame):
 
         # Bind double-click event on Treeview
         self.tree.bind("<Double-1>", self.show_tenant_details)
+
+        self.tree.bind("<Double-3>", self.show_edit_tenant_info)
 
     def create_widgets(self):
         # Add background image
@@ -277,6 +280,20 @@ class TenantInformationFrame(BaseFrame):
 
         # Create an instance of DisplayTenantComponent and pass tenant_id
         DisplayTenantComponent(top_level_window, tenant_id)
+
+    def show_edit_tenant_info(self, event):
+        # Get the selected item from Treeview
+        item = self.tree.selection()[0]
+        # Retrieve the tenant_id (the last column in the Treeview)
+        tenant_id = self.tree.item(item, "values")[-1]
+
+        # Open a new window to display tenant details
+        top_level_window = tk.Toplevel(self)
+        top_level_window.title("Edit Tenant Details")
+        top_level_window.geometry("1120x720")
+
+        # Create an instance of EditTenantComponent and pass tenant_id
+        EditTenantComponent(top_level_window, tenant_id)
 
     def delete_selected(self):
         selected_item = self.tree.selection()  # Get selected item(s)
