@@ -16,6 +16,7 @@ class BuildingInformationFrame(BaseFrame):
         super().__init__(parent, controller)
         self.create_widgets()
         self.populate_treeview()
+        self.start_refresh()
 
         self.tree.bind("<Double-3>", self.show_edit_building_info)
     def create_widgets(self):
